@@ -1,0 +1,20 @@
+name: OpenAPI Typescript Angular Client
+
+on:
+  workflow_call:
+    inputs:
+      artifact-name:
+        description: 'The name of the OpenAPI artifact to use'
+        required: true
+        type: string
+    
+jobs:
+  openapi-typescript-angular:
+    runs-on: ubuntu-latest
+    steps:
+      # Download the OpenAPI artifact
+      - name: Download OpenAPI artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: openapi
