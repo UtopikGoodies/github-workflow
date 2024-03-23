@@ -12,10 +12,9 @@ on:
       dockerfile-directory:
         required: true
         type: string
-    # secrets:
+    secrets:
       docker-password:
         required: true
-        type: string
 
 jobs:
   docker:
