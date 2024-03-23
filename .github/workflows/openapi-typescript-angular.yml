@@ -41,7 +41,10 @@ jobs:
                 -i /workspace/openapi.json \
                 -g typescript-angular \
                 -o /workspace/ \
-                --additional-properties=npmName=${{ inputs.npm-package-scope }}/${{ inputs.npm-package-name }},npmVersion=${{ inputs.npm-package-version }},npmRepository=https://github.com/${{ github.repository }}/
+                --additional-properties=\
+                  npmName=${{ inputs.npm-package-scope }}/${{ inputs.npm-package-name }},\
+                  npmVersion=${{ inputs.npm-package-version }},\
+                  npmRepository=https://github.com/${{ github.repository }}/
 
       # Add information to the package configuration.
       - name: Configure package
