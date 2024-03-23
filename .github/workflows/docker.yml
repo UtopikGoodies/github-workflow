@@ -12,6 +12,9 @@ on:
       dockerfile-directory:
         required: true
         type: string
+    outputs:
+      image-tags:
+        value: ${{ jobs.docker.outputs.image-tags }}
     secrets:
       docker-password:
         required: true
