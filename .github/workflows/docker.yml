@@ -9,12 +9,13 @@ on:
       docker-username:
         required: true
         type: string
-      dockerfile-path:
+      dockerfile-directory:
         required: true
         type: string
-    secrets:
+    # secrets:
       docker-password:
         required: true
+        type: string
 
 jobs:
   docker:
@@ -46,7 +47,7 @@ jobs:
         with:
           registry: ${{ inputs.docker-registry }}
           username: ${{ inputs.docker-username }}
-          password: ${{ inputs.docker-password }}
+          password: ${{ secrets.docker-password }}
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
@@ -78,7 +79,7 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@v5
         with:
-          context: ${{ inputs.dockerfile-path }}
+          context: ${{ inputs.dockerfile-directory }}
           push: true
           tags: ${{ steps.updated-tags.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
