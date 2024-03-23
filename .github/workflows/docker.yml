@@ -19,6 +19,8 @@ on:
 jobs:
   docker:
     runs-on: ubuntu-latest
+    outputs:
+      image_tags: ${{ steps.updated-tags.outputs.tags }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
