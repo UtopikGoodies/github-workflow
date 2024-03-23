@@ -46,7 +46,7 @@ jobs:
         with:
           registry: ${{ inputs.docker-registry }}
           username: ${{ inputs.docker-username }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ contains(inputs.docker-registry, 'ghcr.io') && secrets.GITHUB_TOKEN || secrets.docker-password }}
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
