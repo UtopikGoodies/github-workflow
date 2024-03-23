@@ -29,7 +29,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.artifact-name }}
-          path: openapi
 
       # Generate a npm package for Angular library based on the OpenAPI Configuration File.
       - name: Generate Angular Client
