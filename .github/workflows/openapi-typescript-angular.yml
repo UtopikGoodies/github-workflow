@@ -62,10 +62,23 @@ jobs:
         with:
           name: ${{ inputs.artifact-name }}
 
-      - name: Get the previous package id for the same package version
-        id: package-id 
+      - name: Get the package id
+        id: package-id
         run: |
-          echo "::set-output name=package_id::$(gh package version list ${{ github.repository }} --package-version ${{ github.event.inputs.package-version }} --json | jq -r '.[0].id')"
+          packgeId="$(gh api graphql -F owner='{owner}' -F name='{repo}' -f query='
+            query=${
+              repository(owner: $owner, name: $name) {
+                packages(first: 1, names: ["npm"]) {
+                  nodes {
+                    id
+                  }
+                }
+              }
+            }
+          ')"
+          echo "::set-output name=package-id::${packgeId}"
+
+
 
       - run: echo ${{ steps.package-id.outputs.package-id }}
 
