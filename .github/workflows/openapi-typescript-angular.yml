@@ -62,10 +62,10 @@ jobs:
         with:
           name: ${{ inputs.artifact-name }}
 
-      - uses: ./.github/actions/github-package-get-action
-        id: package-id
-        with:
-          package-version: ${{ inputs.npm-package-version }}
+      - name: Get the previous package id for the same package version
+        id: package-id 
+        run: |
+          echo "::set-output name=package_id::$(gh package version list ${{ github.repository }} --package-version ${{ github.event.inputs.package-version }} --json | jq -r '.[0].id')"
 
       - run: echo ${{ steps.package-id.outputs.package-id }}
 
