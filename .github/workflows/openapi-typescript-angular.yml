@@ -67,8 +67,9 @@ jobs:
         run: |
           ORG=${{ github.repository_owner }}
           PACKAGE_NAME=${{ inputs.npm-package-name }}
+          PACKAGE_VERSION=${{ inputs.npm-package-version }}
 
-          packageId=$(gh api --paginate "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/versions" -q ".[] | select(.version == \"${PACKAGE_VERSION}\") | .id)
+          packageId=$(gh api --paginate "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/versions" -q ".[] | select(.version == \"${PACKAGE_VERSION}\") | .id")
 
           echo "::set-output name=package-id::${packgeId}"
 
