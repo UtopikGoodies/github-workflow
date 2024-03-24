@@ -73,9 +73,9 @@ jobs:
 
           packageId=$(gh api --paginate "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/versions" -q ".[] | select(.version == \"${PACKAGE_VERSION}\") | .id")
 
-          echo "::set-output name=package-id::${packgeId}"
+          echo "${packgeId}"
 
-      - run: echo ${{ steps.package-id.outputs.package-id }}
+      # - run: echo ${{ steps.package-id.outputs.package-id }}
 
       # # Generate a npm package for Angular library based on the OpenAPI Configuration File.
       # - name: Generate Angular Client
