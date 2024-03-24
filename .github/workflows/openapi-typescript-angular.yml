@@ -72,7 +72,7 @@ jobs:
           PACKAGE_VERSION=${{ inputs.npm-package-version }}
           echo "PACKAGE_VERSION: $PACKAGE_VERSION"
 
-          packageVersions=$(gh api --paginate "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/versions" | jq -r '.[] | select(.version | startswith('\"${PACKAGE_VERSION}\"'))')
+          packageVersions=$(gh api --paginate "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/versions" | jq -r '.[] | select(.version | startswith("'"${PACKAGE_VERSION}"'"))')
 
           echo "${packageVersions}"
 
