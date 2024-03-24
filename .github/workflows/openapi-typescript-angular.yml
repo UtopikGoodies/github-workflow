@@ -65,20 +65,12 @@ jobs:
       - name: Get the package id
         id: package-id
         run: |
-          packgeId="$(gh api graphql -F owner='{owner}' -F name='{repo}' -f query='
-            query=${
-              repository(owner: $owner, name: $name) {
-                packages(first: 1, names: ["npm"]) {
-                  nodes {
-                    id
-                  }
-                }
-              }
-            }
-          ')"
+          ORG=${{ github.repository_owner }}
+          PACKAGE_NAME=${{ inputs.npm-package-name }}
+
+          packageId=$(gh api --paginate "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/versions" -q ".[] | select(.version == \"${PACKAGE_VERSION}\") | .id)
+
           echo "::set-output name=package-id::${packgeId}"
-
-
 
       - run: echo ${{ steps.package-id.outputs.package-id }}
 
