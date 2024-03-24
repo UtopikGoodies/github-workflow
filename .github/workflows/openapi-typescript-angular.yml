@@ -64,6 +64,8 @@ jobs:
 
       - name: Get the package id
         id: package-id
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           ORG=${{ github.repository_owner }}
           PACKAGE_NAME=${{ inputs.npm-package-name }}
