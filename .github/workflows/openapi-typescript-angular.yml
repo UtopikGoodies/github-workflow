@@ -54,6 +54,8 @@ jobs:
   build-publish:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       # Download the OpenAPI artifact
       - name: Download OpenAPI artifact
         uses: actions/download-artifact@v4
