@@ -73,7 +73,7 @@ jobs:
 
           packageVersions=$(gh api --paginate "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/versions")
 
-          echo "${packgeId}"
+          echo "${packageVersions}"
 
       # - run: echo ${{ steps.package-id.outputs.package-id }}
 
