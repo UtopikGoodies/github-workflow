@@ -3,11 +3,11 @@ name: Docker
 on:
   workflow_call:
     inputs:
-      docker-registry:
+      registry:
         description: 'Docker registry to push images to'
         required: true
         type: string
-      docker-username:
+      username:
         description: 'Docker registry username'
         required: true
         type: string
@@ -20,7 +20,7 @@ on:
         description: 'Docker image tags'
         value: ${{ jobs.build-publish.outputs.image-tags }}
     secrets:
-      docker-password:
+      password:
         description: 'Docker registry password'
         required: true
 
@@ -52,13 +52,13 @@ jobs:
 
       # Login against a Docker registry
       # https://github.com/docker/login-action
-      - name: Log into Docker registry ${{ inputs.docker-registry }}
+      - name: Log into Docker registry ${{ inputs.registry }}
         uses: docker/login-action@v3
         with:
-          registry: ${{ inputs.docker-registry }}
-          username: ${{ inputs.docker-username }}
-          password: ${{ secrets.docker-password }}
-          # password: ${{ contains(inputs.docker-registry, 'ghcr.io') && secrets.GITHUB_TOKEN || secrets.docker-password }}
+          registry: ${{ inputs.registry }}
+          username: ${{ inputs.username }}
+          password: ${{ secrets.password }}
+          # password: ${{ contains(inputs.registry, 'ghcr.io') && secrets.GITHUB_TOKEN || secrets.password }}
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
@@ -66,7 +66,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ inputs.docker-registry }}/${{ github.repository }}
+          images: ${{ inputs.registry }}/${{ github.repository }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
