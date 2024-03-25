@@ -56,65 +56,63 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # # Download the OpenAPI artifact
-      # - name: Download OpenAPI artifact
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: ${{ inputs.artifact-name }}
+      # Download the OpenAPI artifact
+      - name: Download OpenAPI artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
 
-      - name: Get the package id
-        id: package-id
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          ORG=${{ github.repository_owner }}
-          PACKAGE_NAME=${{ inputs.npm-package-name }}
-          PACKAGE_VERSION=${{ inputs.npm-package-version }}
+      # - name: Get the package id
+      #   id: package-id
+      #   env:
+      #     GH_TOKEN: ${{ github.token }}
+      #   run: |
+      #     ORG=${{ github.repository_owner }}
+      #     PACKAGE_NAME=${{ inputs.npm-package-name }}
+      #     PACKAGE_VERSION=${{ inputs.npm-package-version }}
 
-          packageVersions=$(gh api --paginate "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/versions" | jq '.[] | select(.name | startswith("'"${PACKAGE_VERSION}"'"))')
+      #     packageVersions=$(gh api --paginate "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/versions" | jq '.[] | select(.name | startswith("'"${PACKAGE_VERSION}"'"))')
 
-          echo "${packageVersions}"
-
-          
+      #     echo "package-id=${packageVersions}" >> $GITHUB_OUTPUT
 
       # - run: echo ${{ steps.package-id.outputs.package-id }}
 
-      # # Generate a npm package for Angular library based on the OpenAPI Configuration File.
-      # - name: Generate Angular Client
-      #   run: |
-      #     docker run --rm \
-      #       -v ${{ github.workspace }}:/workspace \
-      #       openapitools/openapi-generator-cli \
-      #         generate \
-      #           -i /workspace/openapi.json \
-      #           -g typescript-angular \
-      #           -o /workspace/ \
-      #           --additional-properties=npmName=${{ inputs.npm-package-scope }}/${{ inputs.npm-package-name }},npmVersion=${{ inputs.npm-package-version }}
+      # Generate a npm package for Angular library based on the OpenAPI Configuration File.
+      - name: Generate Angular Client
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            openapitools/openapi-generator-cli \
+              generate \
+                -i /workspace/openapi.json \
+                -g typescript-angular \
+                -o /workspace/ \
+                --additional-properties=npmName=${{ inputs.npm-package-scope }}/${{ inputs.npm-package-name }},npmVersion=${{ inputs.npm-package-version }}
 
-      # # Add information to the package configuration.
-      # - name: Configure package
-      #   run: |
-      #     jq '.description = "${{ inputs.npm-package-description }}"' package.json > tmp.json && mv tmp.json package.json
-      #     jq '.author = "${{ inputs.npm-package-author }}"' package.json > tmp.json && mv tmp.json package.json
-      #     jq '.repository = {"type": "git", "url": "git+https://github.com/${{ github.repository }}.git"}' package.json > tmp.json && mv tmp.json package.json
-      #     jq '.license = "${{ inputs.npm-package-license }}"' package.json > tmp.json && mv tmp.json package.json
-      # - run: cat package.json
+      # Add information to the package configuration.
+      - name: Configure package
+        run: |
+          jq '.description = "${{ inputs.npm-package-description }}"' package.json > tmp.json && mv tmp.json package.json
+          jq '.author = "${{ inputs.npm-package-author }}"' package.json > tmp.json && mv tmp.json package.json
+          jq '.repository = {"type": "git", "url": "git+https://github.com/${{ github.repository }}.git"}' package.json > tmp.json && mv tmp.json package.json
+          jq '.license = "${{ inputs.npm-package-license }}"' package.json > tmp.json && mv tmp.json package.json
+      - run: cat package.json
 
-      # # Setup the requirement for npm package
-      # - name: Set up Node.js
-      #   uses: actions/setup-node@v4.0.1
-      #   with:
-      #     node-version: 18
-      #     registry-url: ${{ inputs.npm-registry-url }}
-      #     scope: ${{ inputs.npm-package-scope }}
+      # Setup the requirement for npm package
+      - name: Set up Node.js
+        uses: actions/setup-node@v4.0.1
+        with:
+          node-version: 18
+          registry-url: ${{ inputs.npm-registry-url }}
+          scope: ${{ inputs.npm-package-scope }}
 
-      # # Install requirement and build the package.
-      # - name: Build the package
-      #   run: npm install
-      # - run: npm run build
+      # Install requirement and build the package.
+      - name: Build the package
+        run: npm install
+      - run: npm run build
 
-      # # Publish the package.
-      # - name: Publish the package
-      #   run: npm publish --access ${{ inputs.npm-package-access }} ${{ inputs.npm-package-tag && format('--tag {0}', inputs.npm-package-tag) || '--no-tag' }}
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.npm-registry-token }}
+      # Publish the package.
+      - name: Publish the package
+        run: npm publish --access ${{ inputs.npm-package-access }} ${{ inputs.npm-package-tag && format('--tag {0}', inputs.npm-package-tag) || '--no-tag' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm-registry-token }}
