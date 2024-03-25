@@ -70,11 +70,12 @@ jobs:
           ORG=${{ github.repository_owner }}
           PACKAGE_NAME=${{ inputs.npm-package-name }}
           PACKAGE_VERSION=${{ inputs.npm-package-version }}
-          echo "PACKAGE_VERSION: $PACKAGE_VERSION"
 
-          packageVersions=$(gh api --paginate "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/versions" | jq -r '.[] | select(.version | startswith("'"${PACKAGE_VERSION}"'"))')
+          packageVersions=$(gh api --paginate "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/versions" | jq '.[] | select(.name | startswith("$PACKAGE_VERSION"))')
 
           echo "${packageVersions}"
+
+          
 
       # - run: echo ${{ steps.package-id.outputs.package-id }}
 
