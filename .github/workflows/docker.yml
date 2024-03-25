@@ -15,18 +15,14 @@ on:
         description: 'Directory containing the Dockerfile'
         required: true
         type: string
-      password:
-        description: 'Docker registry password'
-        required: true
-        type: string
     outputs:
       image-tags:
         description: 'Docker image tags'
         value: ${{ jobs.build-publish.outputs.image-tags }}
-    # secrets:
-    #   password:
-    #     description: 'Docker registry password'
-    #     required: true
+    secrets:
+      password:
+        description: 'Docker registry password'
+        required: true
 
 jobs:
   build-publish:
