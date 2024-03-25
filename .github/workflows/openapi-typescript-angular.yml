@@ -3,14 +3,16 @@ name: OpenAPI Typescript Angular Client
 on:
   workflow_call:
     inputs:
-      npm-registry-url:
-        description: 'The npm registry url of the package'
-        required: false
-        type: string
       artifact-name:
         description: 'The name of the OpenAPI artifact to use'
         required: true
         type: string
+        default: 'openapi'
+      npm-registry:
+        description: 'The npm registry url of the package'
+        required: false
+        type: string
+        default: 'https://registry.npmjs.org'
       npm-package-scope:
         description: 'The npm scope of the package'
         required: true
@@ -41,7 +43,7 @@ on:
         required: false
         type: string
       npm-package-access:
-        description: 'The npm access of the package'
+        description: 'The npm access level of the package'
         required: false
         type: string
         default: 'public'
@@ -103,7 +105,7 @@ jobs:
         uses: actions/setup-node@v4.0.1
         with:
           node-version: 18
-          registry-url: ${{ inputs.npm-registry-url }}
+          registry-url: ${{ inputs.npm-registry }}
           scope: ${{ inputs.npm-package-scope }}
 
       # Install requirement and build the package.
