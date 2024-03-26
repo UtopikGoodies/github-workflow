@@ -58,26 +58,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Download the OpenAPI artifact
-      - name: Download OpenAPI artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ inputs.artifact-name }}
+      # # Download the OpenAPI artifact
+      # - name: Download OpenAPI artifact
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: ${{ inputs.artifact-name }}
 
-      # - name: Get the package id
-      #   id: package-id
-      #   env:
-      #     GH_TOKEN: ${{ github.token }}
-      #   run: |
-      #     ORG=${{ github.repository_owner }}
-      #     PACKAGE_NAME=${{ inputs.npm-package-name }}
-      #     PACKAGE_VERSION=${{ inputs.npm-package-version }}
+      - name: Get the package id
+        id: package-id
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ORG=${{ github.repository_owner }}
+          PACKAGE_NAME=${{ inputs.npm-package-name }}
+          PACKAGE_VERSION=${{ inputs.npm-package-version }}
 
-      #     packageVersions=$(gh api --paginate "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/versions" | jq '.[] | select(.name | startswith("'"${PACKAGE_VERSION}"'"))')
+          packageVersions=$(gh api "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/versions" --jq '.[] | select(.name | startswith("'"${PACKAGE_VERSION}"'"))')
 
-      #     echo "package-id=${packageVersions}" >> $GITHUB_OUTPUT
+          echo "package-id=${packageVersions}" >> $GITHUB_OUTPUT
 
-      # - run: echo ${{ steps.package-id.outputs.package-id }}
+      - run: echo ${{ steps.package-id.outputs.package-id }}
 
       # Generate a npm package for Angular library based on the OpenAPI Configuration File.
       - name: Generate Angular Client
