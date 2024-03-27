@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        package_type: [container]
+        package_type: [npm]
         # package_type: [container, npm, maven, rubygems, docker, nuget]
     steps:
       - name: Get all ${{ matrix.package_type }} packages
