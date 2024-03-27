@@ -35,6 +35,8 @@ jobs:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
           package_id=$(gh api /orgs/${{ inputs.github-organisation }}/packages/${{ inputs.package-type }}/${{ inputs.package-name }} | jq -r '.id')
+          echo "$package_id"
+
           echo "id=$package_id" >> $GITHUB_OUTPUT
 
       - name: Delete package version
