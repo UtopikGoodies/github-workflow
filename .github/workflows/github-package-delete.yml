@@ -23,7 +23,7 @@ on:
     secrets:
       github-token:
         description: 'GitHub token'
-        required: true
+        required: false
 
 jobs:
   delete:
