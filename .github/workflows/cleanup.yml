@@ -13,10 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        package_type: [container, npm, maven, rubygems, docker, nuget]
+        package_type: [container]
+        # package_type: [container, npm, maven, rubygems, docker, nuget]
     steps:
       - name: Get all ${{ matrix.package_type }} packages
         id: get_packages
+        env:
+          GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
           packagesResponse=$(gh api "/orgs/${{ inputs.organisation }}/packages?type=${{ matrix.package_type }}")
           echo "$packagesResponse"
