@@ -1,0 +1,52 @@
+name: GitHub Package Delete
+
+on:
+  workflow_call:
+    inputs:
+      github-organisation:
+        description: 'GitHub organisation name'
+        required: true
+        type: string
+        default: ${{ github.repository_owner }}
+      package-type:
+        description: 'Package type'
+        required: true
+        type: string
+      package-name:
+        description: 'Package name to delete'
+        required: true
+        type: string
+      package-version:
+        description: 'Package version to delete'
+        required: true
+        type: string
+    secrets:
+      github-token:
+        description: 'GitHub token'
+        required: false
+
+jobs:
+  delete:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get package id
+        id: package_id
+        env:
+          GH_TOKEN: ${{ secrets.github-token || github.token }}
+        run: |
+          response=$(gh api /orgs/${{ inputs.github-organisation }}/packages/${{ inputs.package-type }}/${{ inputs.package-name }}/versions)
+          # echo "response=$response"
+          if jq -e . >/dev/null 2>&1 <<<"$response"; then
+            package_id=$(jq -r '.[] | select(.name=="${{ inputs.package-version }}") | .id' <<<"$response")
+            echo "package_id=$package_id"
+          fi
+
+          echo "id=$package_id" >> $GITHUB_OUTPUT
+
+      - name: Delete package version
+        if: steps.package_id.outputs.id != null
+        env:
+          GH_TOKEN: ${{ secrets.github-token || github.token }}
+        run: |
+          result=$(gh api -X DELETE /orgs/${{ inputs.github-organisation }}/packages/${{ inputs.package-type }}/${{ inputs.package-name }}/versions/${{ steps.package_id.outputs.id }})
+          echo "$result"
