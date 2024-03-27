@@ -5,7 +5,6 @@ on:
     inputs:
       organisation:
         description: 'The organisation to clean up packages for'
-        required: true
         type: string
         default: ${{ github.repository_owner }}
 
