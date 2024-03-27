@@ -34,8 +34,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
-          package_id=$(gh api /orgs/${{ inputs.github-organisation }}/packages/${{ inputs.package-type }}/${{ inputs.package-name }} | jq '.[] | select(.name=="${{ inputs.package-version }}")')
-          echo "$package_id"
+          response=$(gh api /orgs/${{ inputs.github-organisation }}/packages/${{ inputs.package-type }}/${{ inputs.package-name }})
+          if jq -e . >/dev/null 2>&1 <<<"$response"; then
+            package_id=$(jq '.[] | select(.name=="${{ inputs.package-version }}")' <<<"$response")
+            echo "$package_id"
+          fi
 
           echo "id=$package_id" >> $GITHUB_OUTPUT
 
