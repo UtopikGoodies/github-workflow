@@ -21,7 +21,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
-          packagesResponse=$(gh api "/orgs/${{ inputs.organisation }}/packages?type=${{ matrix.package_type }}")
+          packagesResponse=$(gh api "/orgs/${{ inputs.organisation }}/packages?package_type=${{ matrix.package_type }}")
           echo "$packagesResponse"
 
   clean-up:
