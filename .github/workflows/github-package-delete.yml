@@ -37,7 +37,7 @@ jobs:
           response=$(gh api /orgs/${{ inputs.github-organisation }}/packages/${{ inputs.package-type }}/${{ inputs.package-name }}/versions)
           echo "response=$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
-            package_id=$(jq '.[] | select(.name=="${{ inputs.package-version }}")' <<<"$response")
+            package_id=$(jq '.[] | select(.name=="${{ inputs.package-version }}" | .id)' <<<"$response")
             echo "package_id=$package_id"
           fi
 
