@@ -1,0 +1,32 @@
+name: GitHub Package Delete
+
+on:
+  workflow_call:
+    inputs:
+      github-organisation:
+        description: 'GitHub organisation name'
+        required: true
+        type: string
+        default: ${{ github.repository_owner }}
+      package-type:
+        description: 'Package type'
+        required: true
+        type: string
+      package-name:
+        description: 'Package name to delete'
+        required: true
+        type: string
+      package-version:
+        description: 'Package version to delete'
+        required: true
+        type: string
+
+jobs:
+  delete:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get package id
+        id: get_package_id
+        run: |
+          package_id=$(gh api /orgs/${{ inputs.github-organisation }}/packages/${{ inputs.package-type }}/${{ inputs.package-name }} | jq -r '.id')
+          echo "$package_id"
