@@ -1,11 +1,29 @@
 name: Clean Up
 
 on:
-  push:
-    branches: [ "main" ]
+  workflow_call:
+    inputs:
+      organisation:
+        description: 'The organisation to clean up packages for'
+        required: true
+        type: string
+        default: ${{ github.repository_owner }}
 
 jobs:
+  remove-pr-package:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package_type: [container, npm, maven, rubygems, docker, nuget]
+    steps:
+      - name: Get all ${{ matrix.package_type }} packages
+        id: get_packages
+        run: |
+          packagesResponse=$(gh api "/orgs/${{ inputs.organisation }}/packages?type=${{ matrix.package_type }}")
+          echo "$packagesResponse"
+
   clean-up:
+    if: false
     runs-on: ubuntu-latest
     permissions:
       contents: read
