@@ -42,5 +42,5 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
-          result=$(gh api -X DELETE /orgs/${{ inputs.github-organisation }}/packages/${{ inputs.package-type }}/${{ inputs.package-name }}/versions/${{ inputs.package-version }})
+          result=$(gh api -X DELETE /orgs/${{ inputs.github-organisation }}/packages/${{ inputs.package-type }}/${{ inputs.package-name }}/versions/${{ steps.package_id.outputs.id }})
           echo "$result"
