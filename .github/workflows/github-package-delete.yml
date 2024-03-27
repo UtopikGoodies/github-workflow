@@ -35,6 +35,7 @@ jobs:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
           response=$(gh api /orgs/${{ inputs.github-organisation }}/packages/${{ inputs.package-type }}/${{ inputs.package-name }})
+          echo "$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
             package_id=$(jq '.[] | select(.name=="${{ inputs.package-version }}")' <<<"$response")
             echo "$package_id"
