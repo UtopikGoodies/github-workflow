@@ -3,7 +3,7 @@ name: Clean Up
 on:
   workflow_call:
     inputs:
-      organisation:
+      github-organisation:
         description: 'The organisation to clean up packages for'
         type: string
         default: ${{ github.repository_owner }}
@@ -21,7 +21,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
-          packagesResponse=$(gh api "/orgs/${{ inputs.organisation }}/packages?package_type=${{ matrix.package_type }}")
+          packagesResponse=$(gh api /orgs/${{ inputs.github-organisation }}/packages?package_type=${{ matrix.package_type }})
           echo "$packagesResponse"
 
   clean-up:
