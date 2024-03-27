@@ -34,7 +34,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
-          response=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/${{ inputs.github-organisation }}/packages/${{ inputs.package-type }}/${{ inputs.package-name }})/versions
+          response=$(gh api /orgs/${{ inputs.github-organisation }}/packages/${{ inputs.package-type }}/${{ inputs.package-name }}/versions)
           echo "response=$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
             package_id=$(jq '.[] | select(.name=="${{ inputs.package-version }}")' <<<"$response")
