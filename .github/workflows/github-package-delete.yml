@@ -20,6 +20,10 @@ on:
         description: 'Package version to delete'
         required: true
         type: string
+    secrets:
+      github-token:
+        description: 'GitHub token'
+        required: true
 
 jobs:
   delete:
@@ -27,6 +31,8 @@ jobs:
     steps:
       - name: Get package id
         id: get_package_id
+        env:
+          GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
           package_id=$(gh api /orgs/${{ inputs.github-organisation }}/packages/${{ inputs.package-type }}/${{ inputs.package-name }} | jq -r '.id')
           echo "$package_id"
