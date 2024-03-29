@@ -12,12 +12,13 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
-      organisation: ${{ env.GITHUB_REPOSITORY_OWNER }}
+      organisation: ${{ steps.meta.outputs.organisation }}
       repository: ${{ steps.meta.outputs.repository }}
     steps:
       - name: Set outputs
         id: meta
         run: |
+          echo "organisation=$(echo ${{ github.repository }} | cut -d '/' -f 1)" >> $GITHUB_ENV
           echo "repository=$(echo ${{ github.repository }} | cut -d '/' -f 2)" >> $GITHUB_ENV
 
   remove-pr-package:
@@ -36,8 +37,10 @@ jobs:
           response=$(gh api /repos/${{ inputs.github-repository }}/pulls)
           echo "$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
-            echo "jq is installed"
+            pulls=$(jq -r '.[] | select(.state=="open") | .number' <<<"$response")
           fi
+
+          echo "numbers=$pulls" >> $GITHUB_OUTPUT
 
       - name: Get all ${{ matrix.package_type }} packages
         id: packages
@@ -51,6 +54,7 @@ jobs:
           fi
 
           echo "packages=$packages" >> $GITHUB_OUTPUT
+
 
   clean-up:
     if: false
