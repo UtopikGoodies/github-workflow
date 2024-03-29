@@ -24,6 +24,8 @@ jobs:
   get-closed-pr-packages:
     needs: setup
     runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.output.outputs.packages }}
     strategy:
       matrix:
         package_type: [npm]
@@ -86,20 +88,24 @@ jobs:
           names_json='${{ steps.packages.outputs.names }}'
           numbers_json='${{ steps.pullrequests.outputs.numbers }}'
 
-          packages=$(jq -n --argjson names "$names_json" --argjson numbers "$numbers_json" 'reduce range(0; $names|length) as $i ({}; . + {($names[$i]): $numbers[$i]})')
-          echo "packages=$packages"
+          packages=$(jq -n --argjson names "$names_json" --argjson numbers "$numbers_json" 'reduce range(0; $names|length) as $i ({}; . + {($names[$i]): {version: ("pr." + $numbers[$i])}})')
+          echo "packages=$packages" >> $GITHUB_OUTPUT
 
-  # remove-packages:
-  #   needs: [setup, get-closed-pr-packages]
-  #   strategy:
-  #     matrix:
-  #       packages: ${{ needs.get-closed-pr-packages.outputs.packages }}
-  #   uses: ./.github/workflows/github-package-delete.yml
-  #   with:
-  #     github-organisation: ${{ needs.setup.outputs.organisation }}
-  #     package-type: ${{ matrix.packages.type }}
-  #     package-name: ${{ matrix.packages.name }}
-  #     package-version: ${{ matrix.packages.version }}
+  remove-packages:
+    needs: [setup, get-closed-pr-packages]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: ${{ needs.get-closed-pr-packages.outputs.packages }}
+    steps:
+      - run: |
+          echo "packages=${{ matrix.package }}"
+    # uses: ./.github/workflows/github-package-delete.yml
+    # with:
+    #   github-organisation: ${{ needs.setup.outputs.organisation }}
+    #   package-type: ${{ matrix.packages.type }}
+    #   package-name: ${{ matrix.packages.name }}
+    #   package-version: ${{ matrix.packages.version }}
 
   clean-up:
     if: false
