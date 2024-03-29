@@ -21,7 +21,7 @@ jobs:
           echo "ORGANISATION=$(echo ${{ github.repository }} | cut -d '/' -f 1)" >> $GITHUB_ENV
           echo "REPOSITORY=$(echo ${{ github.repository }} | cut -d '/' -f 2)" >> $GITHUB_ENV
 
-  remove-pr-package:
+  get-closed-pr-packages:
     needs: setup
     runs-on: ubuntu-latest
     strategy:
@@ -37,7 +37,8 @@ jobs:
           response=$(gh api /repos/${{ inputs.github-repository }}/pulls)
           # echo "$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
-            pulls=$(jq -j '[.[] | select(.state=="open") | .number]' <<<"$response" | tr -d '\n')
+            # pulls=$(jq -j '[.[] | select(.state=="closed") | .number]' <<<"$response" | tr -d '\n')
+            pulls=$(jq -j '.[] | select(.state=="open") | .number' <<<"$response" | tr -d '\n') #TODO:DEBUG: Uncomment the above line, remove this line
           fi
 
           echo "pulls=$pulls"
@@ -49,7 +50,7 @@ jobs:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
           response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }})
-          echo "$response"
+          # echo "$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
             packages=$(jq -j '[.[] | .name]' <<<"$response" | tr -d '\n')
           fi
@@ -57,19 +58,42 @@ jobs:
           echo "packages=$packages"
           echo "packages=$packages" >> $GITHUB_OUTPUT
 
-      - name: Get all versions of ${{ matrix.package_type }} packages
-        id: versions
-        env:
-          GH_TOKEN: ${{ secrets.github-token || github.token }}
-        run: |
-          response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/${{ steps.packages.outputs.packages }}/versions)
-          echo "$response"
-          if jq -e . >/dev/null 2>&1 <<<"$response"; then
-            versions=$(jq -r '.[] | .name' <<<"$response")
-          fi
+      # - name: Get all versions of ${{ matrix.package_type }} packages
+      #   id: versions
+      #   env:
+      #     GH_TOKEN: ${{ secrets.github-token || github.token }}
+      #   run: |
+      #     response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/${{ steps.packages.outputs.packages }}/versions)
+      #     echo "$response"
+      #     if jq -e . >/dev/null 2>&1 <<<"$response"; then
+      #       versions=$(jq -r '.[] | .name' <<<"$response")
+      #     fi
 
-          echo "versions=$versions"
-          echo "versions=$versions" >> $GITHUB_OUTPUT
+      #     echo "versions=$versions"
+      #     echo "versions=$versions" >> $GITHUB_OUTPUT
+
+      - name: Output
+        id: output
+        run: |
+          declare -A packages
+
+          for package in ${{ steps.packages.outputs.packages }}; do
+            packages[$package]={versions: ${{ steps.pullrequests.outputs.numbers }}}
+          done
+
+          echo "packages=$packages"
+
+  # remove-packages:
+  #   needs: [setup, get-closed-pr-packages]
+  #   strategy:
+  #     matrix:
+  #       packages: ${{ needs.get-closed-pr-packages.outputs.packages }}
+  #   uses: ./.github/workflows/github-package-delete.yml
+  #   with:
+  #     github-organisation: ${{ needs.setup.outputs.organisation }}
+  #     package-type: ${{ matrix.packages.type }}
+  #     package-name: ${{ matrix.packages.name }}
+  #     package-version: ${{ matrix.packages.version }}
 
   clean-up:
     if: false
