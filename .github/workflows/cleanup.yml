@@ -37,10 +37,10 @@ jobs:
           response=$(gh api /repos/${{ inputs.github-repository }}/pulls)
           # echo "$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
-            pulls=$(jq -r '.[] | select(.state=="open") | .number' <<<"$response")
+            pulls=$(jq -r '[.[] | select(.state=="open") | .number]' <<<"$response")
           fi
 
-          echo "$pulls"
+          echo "pulls=$pulls"
           echo "numbers=$pulls" >> $GITHUB_OUTPUT
 
       - name: Get all ${{ matrix.package_type }} packages
@@ -54,7 +54,7 @@ jobs:
             packages=$(jq -r '.[] | .name' <<<"$response")
           fi
 
-          echo "$packages"
+          echo "packages=$packages"
           echo "packages=$packages" >> $GITHUB_OUTPUT
 
       - name: Get all versions of ${{ matrix.package_type }} packages
@@ -68,7 +68,7 @@ jobs:
             versions=$(jq -r '.[] | .name' <<<"$response")
           fi
 
-          echo "$versions"
+          echo "versions=$versions"
           echo "versions=$versions" >> $GITHUB_OUTPUT
 
   clean-up:
