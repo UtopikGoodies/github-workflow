@@ -77,9 +77,9 @@ jobs:
         run: |
           declare -A packages
 
-          for package in ${{ steps.packages.outputs.packages }}; do
-            packages[$package]={versions: ${{ steps.pullrequests.outputs.numbers }}}
-          done
+          # for package in ${{ steps.packages.outputs.packages }}; do
+          #   packages[$package]={versions: ${{ steps.pullrequests.outputs.numbers }}}
+          # done
 
           echo "packages=$packages"
 
