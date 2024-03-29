@@ -12,14 +12,14 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
-      organisation: ${{ steps.meta.outputs.organisation }}
-      repository: ${{ steps.meta.outputs.repository }}
+      organisation: ${{ env.ORGANISATION }}
+      repository: ${{ env.REPOSITORY }}
     steps:
       - name: Set outputs
         id: meta
         run: |
-          echo "organisation=$(echo ${{ github.repository }} | cut -d '/' -f 1)" >> $GITHUB_ENV
-          echo "repository=$(echo ${{ github.repository }} | cut -d '/' -f 2)" >> $GITHUB_ENV
+          echo "ORGANISATION=$(echo ${{ github.repository }} | cut -d '/' -f 1)" >> $GITHUB_ENV
+          echo "REPOSITORY=$(echo ${{ github.repository }} | cut -d '/' -f 2)" >> $GITHUB_ENV
 
   remove-pr-package:
     needs: setup
@@ -35,11 +35,12 @@ jobs:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
           response=$(gh api /repos/${{ inputs.github-repository }}/pulls)
-          echo "$response"
+          # echo "$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
             pulls=$(jq -r '.[] | select(.state=="open") | .number' <<<"$response")
           fi
 
+          echo "$pulls"
           echo "numbers=$pulls" >> $GITHUB_OUTPUT
 
       - name: Get all ${{ matrix.package_type }} packages
@@ -53,6 +54,7 @@ jobs:
             packages=$(jq -r '.[] | .name' <<<"$response")
           fi
 
+          echo "$packages"
           echo "packages=$packages" >> $GITHUB_OUTPUT
 
 
