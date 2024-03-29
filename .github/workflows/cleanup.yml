@@ -16,13 +16,29 @@ jobs:
         package_type: [npm]
         # package_type: [container, npm, maven, rubygems, docker, nuget]
     steps:
-      - name: Get all ${{ matrix.package_type }} packages
-        id: get_packages
+      - name: Get all open pull requests
+        id: pullrequests
         env:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
-          packagesResponse=$(gh api /orgs/${{ inputs.github-organisation }}/packages?package_type=${{ matrix.package_type }})
-          echo "$packagesResponse"
+          response=$(gh api /repos/${{ inputs.github-organisation }}/${{ github.repository }}/pulls)
+          echo "$response"
+          if jq -e . >/dev/null 2>&1 <<<"$response"; then
+            echo "jq is installed"
+          fi
+
+      - name: Get all ${{ matrix.package_type }} packages
+        id: packages
+        env:
+          GH_TOKEN: ${{ secrets.github-token || github.token }}
+        run: |
+          response=$(gh api /orgs/${{ inputs.github-organisation }}/packages?package_type=${{ matrix.package_type }})
+          echo "$response"
+          if jq -e . >/dev/null 2>&1 <<<"$response"; then
+            packages=$(jq -r '.[] | .name' <<<"$response")
+          fi
+
+          echo "packages: $packages" >> $GITHUB_OUTPUT
 
   clean-up:
     if: false
