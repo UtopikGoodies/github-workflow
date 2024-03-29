@@ -81,7 +81,7 @@ jobs:
       - name: Output
         id: output
         run: |
-          packages=$(jq -n --argjson pulls "${{ steps.pullrequests.outputs.numbers }}" --argjson pkgs '${{ steps.packages.outputs.names }}' '$pkgs | map({$pkgs: {version: ("pr." + $pulls)}}) | add' <<<'${{ steps.packages.outputs.names }}')
+          packages=$(jq -n --argjson pulls "${{ steps.pullrequests.outputs.numbers }}" --argjson pkgs "${{ steps.packages.outputs.names }}" '$pkgs | map({($pkgs): {version: ("pr." + $pulls)}}) | add' <<<"${{ steps.packages.outputs.names }}")
 
           echo "packages=$packages"
 
