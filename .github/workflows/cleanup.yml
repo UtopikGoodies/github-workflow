@@ -34,10 +34,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
-          response=$(gh api /repos/${{ inputs.github-repository }}/pulls | tr -d '\r')
+          response=$(gh api /repos/${{ inputs.github-repository }}/pulls)
           # echo "$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
-            pulls=$(jq -r '[.[] | select(.state=="open") | .number]' <<<"$response")
+            pulls=$(jq -j '[.[] | select(.state=="open") | .number]' <<<"$response")
           fi
 
           echo "pulls=$pulls"
