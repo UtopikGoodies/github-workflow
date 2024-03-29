@@ -29,7 +29,7 @@ jobs:
         package_type: [npm]
         # package_type: [container, npm, maven, rubygems, docker, nuget]
     steps:
-      - name: Get all open pull requests
+      - name: Get all closed pull requests
         id: pullrequests
         env:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
@@ -57,6 +57,19 @@ jobs:
           echo "$packages"
           echo "packages=$packages" >> $GITHUB_OUTPUT
 
+      - name: Get all versions of ${{ matrix.package_type }} packages
+        id: versions
+        env:
+          GH_TOKEN: ${{ secrets.github-token || github.token }}
+        run: |
+          response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/${{ steps.packages.outputs.packages }}/versions)
+          echo "$response"
+          if jq -e . >/dev/null 2>&1 <<<"$response"; then
+            versions=$(jq -r '.[] | .name' <<<"$response")
+          fi
+
+          echo "$versions"
+          echo "versions=$versions" >> $GITHUB_OUTPUT
 
   clean-up:
     if: false

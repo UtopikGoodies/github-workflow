@@ -27,7 +27,23 @@ jobs:
   delete:
     runs-on: ubuntu-latest
     steps:
+      - name: Check package exist
+        id: package_exist
+        env:
+          GH_TOKEN: ${{ secrets.github-token || github.token }}
+        run: |
+          response=$(gh api /orgs/${{ inputs.github-organisation }}/packages?package_type=${{ inputs.package-type }})
+          echo "response=$response"
+          if jq -e . >/dev/null 2>&1 <<<"$response"; then
+            package_name=$(jq -r '.[] | select(.name=="${{ inputs.package-name }}") | .name' <<<"$response")
+            echo "package_name=$package_name"
+          fi
+
+            exist=$(if [[ -n "$package_name" ]]; then echo 1; else echo 0; fi)
+            echo "exist=$exist" >> $GITHUB_OUTPUT
+
       - name: Get package id
+        if: steps.package_exist.outputs.exist == 1
         id: package_id
         env:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
