@@ -78,6 +78,7 @@ jobs:
           declare -A packages
 
           for package in ${{ steps.packages.outputs.packages }}; do
+            echo "package=$package"
             packages[$package]={versions: ${{ steps.pullrequests.outputs.numbers }}}
           done
 
