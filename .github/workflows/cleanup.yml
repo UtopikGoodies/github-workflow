@@ -51,7 +51,7 @@ jobs:
         run: |
 
           response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }})
-          packages=$(jq -n --argjson pulls "${{ steps.pullrequests.outputs.numbers }}" --argjson pkgs "$response" '$pkgs | map({(.name): {version: $pulls}}) | add' <<<"$response")
+          packages=$(jq -n --argjson pulls "${{ steps.pullrequests.outputs.numbers }}" --argjson pkgs "$response" '$pkgs | map({(.name): {version: pr.$pulls}}) | add' <<<"$response")
           echo "packages=$packages"
 
           # response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }})
