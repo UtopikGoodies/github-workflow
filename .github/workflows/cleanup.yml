@@ -37,7 +37,7 @@ jobs:
           response=$(gh api /repos/${{ inputs.github-repository }}/pulls)
           # echo "$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
-            pulls=$(jq -r '[.[] | select(.state=="open") | .number]' <<<"$response")
+            pulls=$(jq -r '[.[] | select(.state=="open") | .number]' <<<"$response" | tr -d '\r')
           fi
 
           echo "pulls=$pulls"
