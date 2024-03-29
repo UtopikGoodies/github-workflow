@@ -51,7 +51,7 @@ jobs:
           response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }})
           echo "$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
-            packages=$(jq -r '.[] | .name' <<<"$response")
+            packages=$(jq -j '[.[] | .name]' <<<"$response" | tr -d '\n')
           fi
 
           echo "packages=$packages"
