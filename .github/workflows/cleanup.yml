@@ -38,7 +38,7 @@ jobs:
           # echo "$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
             # pulls=$(jq -j '[.[] | select(.state=="closed") | .number]' <<<"$response" | tr -d '\n')
-            pulls=$(jq -j '[.[] | select(.state=="open") | .number]' <<<"$response" | tr -d '\n') #TODO:DEBUG: Uncomment the above line, remove this line
+            # pulls=$(jq -j '[.[] | select(.state=="open") | .number]' <<<"$response" | tr -d '\n') #TODO:DEBUG: Uncomment the above line, remove this line
           fi
 
           echo "pulls=$pulls"
@@ -57,8 +57,8 @@ jobs:
           response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }})
           echo "$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
-            # packages=$(jq -j '.[] | [.name]' <<<"$response" | tr -d '\n')
-            packages=$(jq -j 'map({name})' <<<"$response" | tr -d '\n')
+            packages=$(jq -j '.[] | [.name]' <<<"$response" | tr -d '\n')
+            # packages=$(jq -j 'map({name})' <<<"$response" | tr -d '\n')
           fi
 
           echo "packages=$packages"
@@ -81,7 +81,7 @@ jobs:
       - name: Output
         id: output
         run: |
-          packages=$(jq -n --argjson pulls "${{ steps.pullrequests.outputs.numbers }}" --argjson pkgs "${{ steps.packages.outputs.names }}" '$pkgs | map({(.name): {version: ("pr." + $pulls)}}) | add' <<<"${{ steps.packages.outputs.names }}")
+          packages=$(jq -n --argjson pulls "${{ steps.pullrequests.outputs.numbers }}" --argjson pkgs "${{ steps.packages.outputs.names }}" '$pkgs | map({$pkgs: {version: ("pr." + $pulls)}}) | add' <<<"${{ steps.packages.outputs.names }}")
 
           echo "packages=$packages"
 
