@@ -6,7 +6,11 @@ on:
       github-organisation:
         description: 'The organisation to clean up packages for'
         type: string
-        default: ${{ github.repository_owner }}
+        default: ${{ github.repository.owner }}
+      github-repository:
+        description: 'The repository to clean up packages for'
+        type: string
+        default: ${{ github.repository.name }}
 
 jobs:
   remove-pr-package:
@@ -21,7 +25,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
-          response=$(gh api /repos/${{ inputs.github-organisation }}/${{ github.repository }}/pulls)
+          response=$(gh api /repos/${{ inputs.github-organisation }}/${{ inputs.github-repository }}/pulls)
           echo "$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
             echo "jq is installed"
@@ -38,7 +42,7 @@ jobs:
             packages=$(jq -r '.[] | .name' <<<"$response")
           fi
 
-          echo "packages: $packages" >> $GITHUB_OUTPUT
+          echo "packages=$packages" >> $GITHUB_OUTPUT
 
   clean-up:
     if: false
