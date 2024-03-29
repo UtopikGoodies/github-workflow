@@ -38,7 +38,7 @@ jobs:
           # echo "$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
             # pulls=$(jq -j '[.[] | select(.state=="closed") | .number]' <<<"$response" | tr -d '\n')
-            # pulls=$(jq -j '[.[] | select(.state=="open") | .number]' <<<"$response" | tr -d '\n') #TODO:DEBUG: Uncomment the above line, remove this line
+            pulls=$(jq -j '[.[] | select(.state=="open") | .number]' <<<"$response" | tr -d '\n') #TODO:DEBUG: Uncomment the above line, remove this line
           fi
 
           echo "pulls=$pulls"
