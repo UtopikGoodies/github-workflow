@@ -49,13 +49,18 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
-          response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }})
-          # echo "$response"
-          if jq -e . >/dev/null 2>&1 <<<"$response"; then
-            packages=$(jq -j '[.[] | .name]' <<<"$response" | tr -d '\n')
-          fi
 
+          response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }})
+          packages=$(jq -n --argjson pulls "${{ steps.pullrequests.outputs.numbers }}" --argjson pkgs "$response" '$pkgs | map({(.name): $pulls}) | add' <<<"$response")
           echo "packages=$packages"
+
+          # response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }})
+          # # echo "$response"
+          # if jq -e . >/dev/null 2>&1 <<<"$response"; then
+          #   packages=$(jq -j '[.[] | .name]' <<<"$response" | tr -d '\n')
+          # fi
+
+          # echo "packages=$packages"
           echo "packages=$packages" >> $GITHUB_OUTPUT
 
       # - name: Get all versions of ${{ matrix.package_type }} packages
@@ -72,17 +77,19 @@ jobs:
       #     echo "versions=$versions"
       #     echo "versions=$versions" >> $GITHUB_OUTPUT
 
-      - name: Output
-        id: output
-        run: |
-          declare -A packages
+      # - name: Output
+      #   id: output
+      #   run: |
+      #     declare -A packages
 
-          for package in ${{ steps.packages.outputs.packages }}; do
-            echo "package=$package"
-            packages[$package]={versions: ${{ steps.pullrequests.outputs.numbers }}}
-          done
+          
 
-          echo "packages=$packages"
+      #     for package in ${{ steps.packages.outputs.packages }}; do
+      #       echo "package=$package"
+      #       packages[$package]={versions: ${{ steps.pullrequests.outputs.numbers }}}
+      #     done
+
+      #     echo "packages=$packages"
 
   # remove-packages:
   #   needs: [setup, get-closed-pr-packages]
