@@ -88,7 +88,7 @@ jobs:
     steps:
       - name: Download artifacts
         run: |
-          package_types="${{ needs.setup.outputs.package_type }}"
+          package_types="${{ fromJson(needs.setup.outputs.package_type) }}"
           for package_type in ${package_types[@]}
           do
             echo "Processing package type: $package_type"
