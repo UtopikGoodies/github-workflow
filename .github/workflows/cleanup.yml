@@ -25,7 +25,7 @@ jobs:
           echo "ORGANISATION=$(echo ${{ inputs.repository }} | cut -d '/' -f 1)" >> $GITHUB_ENV
           echo "REPOSITORY=$(echo ${{ inputs.repository }} | cut -d '/' -f 2)" >> $GITHUB_ENV
 
-  generate-packages-information:
+  packages-information:
     needs: setup
     runs-on: ubuntu-latest
     strategy:
@@ -81,7 +81,7 @@ jobs:
       #     path: packages.json
 
   generate-matrix:
-    needs: [setup, generate-packages-information]
+    needs: [setup, packages-information]
     runs-on: ubuntu-latest
     outputs:
       packages: ${{ steps.matrix.outputs.packages }}
@@ -90,8 +90,8 @@ jobs:
         run: |
           for package_type in ${{ fromJson(needs.setup.outputs.package_type) }}; do
             # wget https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/matrix-$package_type/download -O matrix-$package_type.json
-            echo ${{ needs.generate-packages-information.outputs.packages['$package_type'] }}
-            echo ${{ needs.generate-packages-information.outputs.packages['$package_type'] }} > matrix-$package_type.json
+            echo ${{ needs.packages-information.outputs.packages['$package_type'] }}
+            echo ${{ needs.packages-information.outputs.packages['$package_type'] }} > matrix-$package_type.json
             cat matrix-$package_type.json
           done
 
