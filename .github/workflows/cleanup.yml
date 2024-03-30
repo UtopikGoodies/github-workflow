@@ -91,7 +91,7 @@ jobs:
           packages_types=$(echo '${{ needs.setup.outputs.package_type }}')
           echo "packages_types=$packages_types"
           for row in $(echo "${packages_types}" | jq -r '.[] | @base64'); do
-            _jq() { echo ${row} | base64 --decode | jq -r ${1} }
+            _jq() { echo ${row} | base64 --decode | jq -r ${1}; }
             echo "Processing package: $(_jq '.')"
             # Add your processing logic here
           done
