@@ -9,7 +9,7 @@ on:
         default: ${{ github.repository }}
 
 env:
-  PACKAGE_TYPES: '["npm", "maven", "rubygems", "docker", "nuget"]'
+  PACKAGE_TYPES: '["container", "npm", "maven", "rubygems", "docker", "nuget"]'
 
 jobs:
   setup:
@@ -46,16 +46,6 @@ jobs:
           echo "numbers=$numbers"
           echo "numbers=$numbers" >> $GITHUB_OUTPUT
 
-      # - name: Export pull requests information
-      #   id: export
-      #   run: |
-      #     numbers_json='${{ steps.pullrequests.outputs.numbers }}'
-
-      #     pullrequests=$(jq -n --argjson numbers "$numbers_json" 'reduce range(0; $numbers|length) as $i ({}; . + {($numbers[$i]): {}})' | tr -d '\n')
-      #     echo "pullrequests=$pullrequests"
-      #     # echo "$pullrequests" > pullrequests.json
-      #     echo "pullrequests=$pullrequests" >> $GITHUB_OUTPUT
-
   packages-information:
     needs: [setup, pullrequests-information]
     runs-on: ubuntu-latest
@@ -65,21 +55,6 @@ jobs:
     outputs:
       packages: ${{ steps.export.outputs.packages }}
     steps:
-      # - name: Get all closed pull requests
-      #   id: pullrequests
-      #   env:
-      #     GH_TOKEN: ${{ secrets.github-token || github.token }}
-      #   run: |
-      #     response=$(gh api /repos/${{ inputs.repository }}/pulls)
-      #     # echo "$response"
-      #     if jq -e . >/dev/null 2>&1 <<<"$response"; then
-      #       # pulls=$(jq -j '[.[] | select(.state=="closed") | .number]' <<<"$response" | tr -d '\n')
-      #       pulls=$(jq -j '[.[] | select(.state=="open") | .number]' <<<"$response" | tr -d '\n') #TODO:DEBUG: Uncomment the above line, remove this line
-      #     fi
-
-      #     echo "pulls=$pulls"
-      #     echo "numbers=$pulls" >> $GITHUB_OUTPUT
-
       - name: Get all ${{ matrix.package_type }} packages
         id: packages
         env:
@@ -107,11 +82,11 @@ jobs:
           # echo "$packages" > packages.json
           echo "packages=$packages" >> $GITHUB_OUTPUT
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: packages-${{ matrix.package_type }}
-          path: packages.json
+      # - name: Upload artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: packages-${{ matrix.package_type }}
+      #     path: packages.json
 
   generate-matrix:
     needs: [setup, packages-information]
@@ -121,12 +96,14 @@ jobs:
     steps:
       - name: Download artifacts
         run: |
-          for package_type in $(echo '${{ needs.setup.outputs.package_type }}' | jq -r '.[]')
-          do
-            echo "Processing package type: $package_type"
-            echo ${{ needs.packages-information.outputs.packages }}
-            echo ${{ needs.packages-information.outputs.packages['$package_type'] }} > matrix-$package_type.json
-          done
+          echo ${{ needs.packages-information.outputs.packages }}
+
+          # for package_type in $(echo '${{ needs.setup.outputs.package_type }}' | jq -r '.[]')
+          # do
+          #   echo "Processing package type: $package_type"
+          #   echo ${{ needs.packages-information.outputs.packages }}
+          #   echo ${{ needs.packages-information.outputs.packages }} > matrix-$package_type.json
+          # done
 
       - name: Set matrix
         id: matrix
