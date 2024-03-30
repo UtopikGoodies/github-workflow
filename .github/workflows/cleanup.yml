@@ -88,8 +88,11 @@ jobs:
     steps:
       - name: Download artifacts
         run: |
-          package_types=$(echo ${{ needs.setup.outputs.package_type }}| jq -r '.[]')
+          package_types='["npm", "maven", "rubygems", "docker", "nuget"]'
 
+          # Convert JSON array to bash array
+          package_types=$(echo $package_types | jq -r '.[]')
+          
           for package_type in $package_types
           do
             echo "Processing package type: $package_type"
