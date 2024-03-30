@@ -95,7 +95,9 @@ jobs:
       - name: Set matrix
         id: matrix
         run: |
-            echo "packages=$(jq -s add matrix-*.json)" >> $GITHUB_OUTPUT
+          packages=$(jq -s add matrix-*.json)
+          echo "packages=$packages"
+          echo "packages=$packages" >> $GITHUB_OUTPUT
 
   remove-packages:
     needs: [setup, generate-matrix]
