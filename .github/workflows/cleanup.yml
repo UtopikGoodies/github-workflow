@@ -9,7 +9,7 @@ on:
         default: ${{ github.repository }}
 
 env:
-  PACKAGE_TYPES: "[container, npm, maven, rubygems, docker, nuget]"
+  PACKAGE_TYPES: '["container", "npm", "maven", "rubygems", "docker", "nuget"]'
 
 jobs:
   setup:
