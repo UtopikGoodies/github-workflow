@@ -88,11 +88,11 @@ jobs:
     steps:
       - name: Download artifacts
         run: |
-          packages_types=$(echo '${{ needs.setup.outputs.package_type }}')
-          echo "packages_types=$packages_types"
-          for row in $(echo "${packages_types}" | jq -r '.[] | @base64'); do
-            _jq() { echo ${row} | base64 --decode | jq -r ${1}; }
-            echo "Processing package: $(_jq '.')"
+          package_types=$(echo ${{ needs.setup.outputs.package_type }}| jq -r '.[]')
+
+          for package_type in $package_types
+          do
+            echo "Processing package type: $package_type"
             # Add your processing logic here
           done
 
