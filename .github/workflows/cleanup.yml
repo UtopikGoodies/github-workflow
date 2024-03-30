@@ -9,7 +9,7 @@ on:
         default: ${{ github.repository }}
 
 env:
-  PACKAGE_TYPES: '["container", "npm", "maven", "rubygems", "docker", "nuget"]'
+  PACKAGE_TYPES: '["npm", "maven", "rubygems", "docker", "nuget"]'
 
 jobs:
   setup:
@@ -24,17 +24,13 @@ jobs:
         run: |
           echo "ORGANISATION=$(echo ${{ inputs.repository }} | cut -d '/' -f 1)" >> $GITHUB_ENV
           echo "REPOSITORY=$(echo ${{ inputs.repository }} | cut -d '/' -f 2)" >> $GITHUB_ENV
-          # echo "PACKAGE_TYPES=${{ env.PACKAGE_TYPES }}" >> $GITHUB_ENV
 
   generate-packages-information:
     needs: setup
     runs-on: ubuntu-latest
-    # outputs:
-    #   packages: ${{ steps.data.outputs.packages }}
     strategy:
       matrix:
         package_type: ${{ fromJson(needs.setup.outputs.package_type) }}
-        # package_type: [container, npm, maven, rubygems, docker, nuget]
     steps:
       - name: Get all closed pull requests
         id: pullrequests
@@ -56,39 +52,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
-
-          # response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }})
-          # packages=$(jq -n --argjson pulls "${{ steps.pullrequests.outputs.numbers }}" --argjson pkgs "$response" '$pkgs | map({(.name): {version: pr.$pulls}}) | add' <<<"$response")
-          # echo "packages=$packages"
-
           response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }})
           # echo "$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
             packages=$(jq -j '[.[] | .name]' <<<"$response" | tr -d '\n')
-            # packages=$(jq -j 'map({name})' <<<"$response" | tr -d '\n')
           fi
 
           echo "packages=$packages"
           echo "names=$packages" >> $GITHUB_OUTPUT
 
-      # - name: Get all versions of ${{ matrix.package_type }} packages
-      #   id: versions
-      #   env:
-      #     GH_TOKEN: ${{ secrets.github-token || github.token }}
-      #   run: |
-      #     response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/${{ steps.packages.outputs.packages }}/versions)
-      #     echo "$response"
-      #     if jq -e . >/dev/null 2>&1 <<<"$response"; then
-      #       versions=$(jq -r '.[] | .name' <<<"$response")
-      #     fi
-
-      #     echo "versions=$versions"
-      #     echo "versions=$versions" >> $GITHUB_OUTPUT
-
       - name: Export packages information
         run: |
-          # packages=$(jq -n --argjson pulls "${{ steps.pullrequests.outputs.numbers }}" --argjson pkgs "${{ steps.packages.outputs.names }}" '$pkgs | map({($pkgs): {version: ("pr." + $pulls)}}) | add' <<<"$(echo "${{ steps.packages.outputs.names }}" | jq -c .)")
-
           names_json='${{ steps.packages.outputs.names }}'
           numbers_json='${{ steps.pullrequests.outputs.numbers }}'
 
