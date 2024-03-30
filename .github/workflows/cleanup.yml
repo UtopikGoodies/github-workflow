@@ -89,7 +89,7 @@ jobs:
       - name: Download artifacts
         run: |
           package_types="${{ fromJson(needs.setup.outputs.package_type) }}"
-          readarray -t package_types_array <<< "$package_types"
+          package_types_array=($package_types) # Convert the string to an array
           for package_type in "${package_types_array[@]}"
           do
             echo "Processing package type: $package_type"
