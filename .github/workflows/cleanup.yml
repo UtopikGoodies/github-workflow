@@ -82,23 +82,19 @@ jobs:
       #     path: packages.json
 
   generate-matrix:
-    needs: [setup]
-    # needs: [setup, packages-information]
+    needs: [setup, packages-information]
     runs-on: ubuntu-latest
     outputs:
       packages: ${{ steps.matrix.outputs.packages }}
     steps:
       - name: Download artifacts
         run: |
-          # package_types='${{ needs.setup.outputs.package_type }}'
-
-          # Convert JSON array to bash array
-          package_types=$(echo '${{ needs.setup.outputs.package_type }}' | jq -r '.[]')
+          # package_types=$(echo '${{ needs.setup.outputs.package_type }}' | jq -r '.[]')
           
-          for package_type in $package_types
+          for package_type in $(echo '${{ needs.setup.outputs.package_type }}' | jq -r '.[]')
           do
             echo "Processing package type: $package_type"
-            # Add your processing logic here
+            echo ${{ needs.packages-information.outputs.packages['$package_type'] }} > matrix-$package_type.json
           done
 
 
