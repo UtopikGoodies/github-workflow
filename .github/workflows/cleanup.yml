@@ -26,7 +26,6 @@ jobs:
           echo "REPOSITORY=$(echo ${{ inputs.repository }} | cut -d '/' -f 2)" >> $GITHUB_ENV
 
   packages-information:
-    if: false
     needs: setup
     runs-on: ubuntu-latest
     strategy:
