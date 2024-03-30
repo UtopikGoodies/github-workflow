@@ -89,6 +89,7 @@ jobs:
       - name: Download artifacts
         run: |
           for package_type in ${{ fromJson(needs.setup.outputs.package_type) }}; do
+            echo "Get info from $package_type"
             # wget https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/matrix-$package_type/download -O matrix-$package_type.json
             echo ${{ needs.packages-information.outputs.packages['$package_type'] }}
             echo ${{ needs.packages-information.outputs.packages['$package_type'] }} > matrix-$package_type.json
