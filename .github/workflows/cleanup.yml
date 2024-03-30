@@ -26,6 +26,7 @@ jobs:
           echo "REPOSITORY=$(echo ${{ inputs.repository }} | cut -d '/' -f 2)" >> $GITHUB_ENV
 
   packages-information:
+    if: false
     needs: setup
     runs-on: ubuntu-latest
     strategy:
@@ -88,10 +89,10 @@ jobs:
     steps:
       - name: Download artifacts
         run: |
-          package_types='${{ needs.setup.outputs.package_type }}'
+          # package_types='${{ needs.setup.outputs.package_type }}'
 
           # Convert JSON array to bash array
-          package_types=$(echo $package_types | jq -r '.[]')
+          package_types=$(echo '${{ needs.setup.outputs.package_type }}' | jq -r '.[]')
           
           for package_type in $package_types
           do
