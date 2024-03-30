@@ -31,6 +31,8 @@ jobs:
     strategy:
       matrix:
         package_type: ${{ fromJson(needs.setup.outputs.package_type) }}
+    outputs:
+      packages: ${{ steps.export.outputs.export }}
     steps:
       - name: Get all closed pull requests
         id: pullrequests
@@ -62,6 +64,7 @@ jobs:
           echo "names=$packages" >> $GITHUB_OUTPUT
 
       - name: Export packages information
+        id: export
         run: |
           names_json='${{ steps.packages.outputs.names }}'
           numbers_json='${{ steps.pullrequests.outputs.numbers }}'
@@ -70,11 +73,11 @@ jobs:
           echo "packages=$packages"
           echo "$packages" > packages.json
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: packages-${{ matrix.package_type }}
-          path: packages.json
+      # - name: Upload artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: packages-${{ matrix.package_type }}
+      #     path: packages.json
 
   generate-matrix:
     needs: [setup, generate-packages-information]
@@ -85,7 +88,8 @@ jobs:
       - name: Download artifacts
         run: |
           for package_type in ${{ fromJson(needs.setup.outputs.package_type) }}; do
-            wget https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/matrix-$package_type/download -O matrix-$package_type.json
+            # wget https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/matrix-$package_type/download -O matrix-$package_type.json
+            echo ${{ needs.generate-packages-information.outputs.packages }} > matrix-$package_type.json
           done
 
       - name: Set matrix
