@@ -82,7 +82,8 @@ jobs:
       #     path: packages.json
 
   generate-matrix:
-    needs: [setup, packages-information]
+    needs: [setup]
+    # needs: [setup, packages-information]
     runs-on: ubuntu-latest
     outputs:
       packages: ${{ steps.matrix.outputs.packages }}
