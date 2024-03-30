@@ -28,9 +28,6 @@ jobs:
   pullrequests-information:
     needs: setup
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        package_type: ${{ fromJson(needs.setup.outputs.package_type) }}
     outputs:
       pullrequests: ${{ steps.export.outputs.pullrequests }}
     steps:
