@@ -88,14 +88,24 @@ jobs:
     steps:
       - name: Download artifacts
         run: |
-          package_types="${{ needs.setup.outputs.package_type }}"
-          package_types_array=($package_types) # Convert the string to an array
-          for package_type in "${package_types_array[@]}"
-          do
-            echo "Processing package type: $package_type"
-            echo ${{ needs.packages-information.outputs.packages['$package_type'] }} > matrix-$package_type.json
-            cat matrix-$package_type.json
+          package_types=$(${{ needs.setup.outputs.package_type }})
+          for row in $(echo "${package_types}" | jq -r '.[] | @base64'); do
+            _jq() {
+              echo ${row} | base64 --decode | jq -r ${1}
+            }
+            echo "Processing package: $(_jq '.')"
+            # Add your processing logic here
           done
+
+
+          # package_types="${{ needs.setup.outputs.package_type }}"
+          # package_types_array=($package_types) # Convert the string to an array
+          # for package_type in "${package_types_array[@]}"
+          # do
+          #   echo "Processing package type: $package_type"
+          #   echo ${{ needs.packages-information.outputs.packages['$package_type'] }} > matrix-$package_type.json
+          #   cat matrix-$package_type.json
+          # done
 
       - name: Set matrix
         id: matrix
