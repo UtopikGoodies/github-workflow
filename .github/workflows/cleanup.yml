@@ -89,7 +89,8 @@ jobs:
       - name: Download artifacts
         run: |
           package_types="${{ fromJson(needs.setup.outputs.package_type) }}"
-          for package_type in ${package_types[@]}
+          readarray -t package_types_array <<< "$package_types"
+          for package_type in "${package_types_array[@]}"
           do
             echo "Processing package type: $package_type"
             echo ${{ needs.packages-information.outputs.packages['$package_type'] }} > matrix-$package_type.json
