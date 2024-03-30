@@ -49,6 +49,9 @@ jobs:
   packages-information:
     needs: [setup, pullrequests-information]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     strategy:
       matrix:
         package_type: ${{ fromJson(needs.setup.outputs.package_type) }}
