@@ -100,6 +100,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       packages: ${{ steps.matrix.outputs.packages }}
+      packages_name: ${{ steps.matrix.outputs.packages_name }}
     steps:
       - name: Download packages information
         id: download
@@ -113,16 +114,18 @@ jobs:
           packages=$(jq -s add packages-*.json | tr -d '\n')
           echo "packages=$packages"
           echo "packages=$packages" >> $GITHUB_OUTPUT
+          echo "packages_name=$(echo $packages | jq -r 'keys[]')" >> $GITHUB_OUTPUT
 
   remove-packages:
     needs: [setup, generate-matrix]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        package: ${{ fromJson(needs.generate-matrix.outputs.packages) }}
+        package_name: ${{ fromJson(needs.generate-matrix.outputs.packages_name) }}
     steps:
       - run: |
-          echo "packages=${{ matrix.package }}"
+          echo "package_name=${{ matrix.package_name }}"
+          echo "package_version=${{ fromJson(needs.generate-matrix.outputs.packages)[matrix.package_name].version }}"
     # uses: ./.github/workflows/github-package-delete.yml
     # with:
     #   github-organisation: ${{ needs.setup.outputs.organisation }}
