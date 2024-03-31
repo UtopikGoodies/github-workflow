@@ -46,8 +46,8 @@ jobs:
         run: |
           response=$(gh api /repos/${{ inputs.repository }}/pulls)
           # echo "$response"
-          # numbers=$(jq -j '[.[] | select(.state=="closed") | .number]' <<<"$response" | tr -d '\n')
-          numbers=$(jq -j '[.[] | select(.state=="open") | .number]' <<<"$response" | tr -d '\n') #TODO:DEBUG: Uncomment the above line, remove this line
+          # numbers=$(jq -j '[.[] | select(.state=="closed") | .number]' <<<"$response" | tr -d '\n' | tr -s ' ')
+          numbers=$(jq -j '[.[] | select(.state=="open") | .number]' <<<"$response" | tr -d '\n' | tr -s ' ') #TODO:DEBUG: Uncomment the above line, remove this line
 
           echo "numbers=$numbers"
           echo "numbers=$numbers" >> $GITHUB_OUTPUT
@@ -71,7 +71,7 @@ jobs:
         run: |
           response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }})
           # echo "$response"
-          packages=$(jq -j '[.[] | .name]' <<<"$response" | tr -d '\n')
+          packages=$(jq -j '[.[] | .name]' <<<"$response" | tr -d '\n' | tr -s ' ')
 
           echo "packages=$packages"
           echo "names=$packages" >> $GITHUB_OUTPUT
@@ -84,7 +84,7 @@ jobs:
       #     numbers_json='${{ needs.pullrequests-information.outputs.numbers }}'
       #     echo "numbers_json=$numbers_json"
 
-      #     packages=$(jq -n --argjson names "$names_json" --argjson numbers "$numbers_json" 'reduce range(0; $names|length) as $i ({}; . + {($names[$i]): {version: ("${{ inputs.prefix }}" + ($numbers[$i] | tostring))}})' | tr -d '\n')
+      #     packages=$(jq -n --argjson names "$names_json" --argjson numbers "$numbers_json" 'reduce range(0; $names|length) as $i ({}; . + {($names[$i]): {version: ("${{ inputs.prefix }}" + ($numbers[$i] | tostring))}})' | tr -d '\n' | tr -s ' ')
       #     echo "packages=$packages"
       #     echo "$packages" > packages-${{ matrix.package_type }}.json
 
@@ -96,7 +96,7 @@ jobs:
           numbers_json='${{ needs.pullrequests-information.outputs.numbers }}'
           echo "numbers_json=$numbers_json"
       
-          packages=$(jq -n --argjson names "$names_json" --argjson numbers "$numbers_json" 'reduce range(0; $names|length) as $i ({}; . + {($names[$i]): {versions: [("${{ inputs.prefix }}" + ($numbers[$i] | tostring))]}})' | tr -d '\n')
+          packages=$(jq -n --argjson names "$names_json" --argjson numbers "$numbers_json" 'reduce range(0; $names|length) as $i ({}; . + {($names[$i]): {versions: [("${{ inputs.prefix }}" + ($numbers[$i] | tostring))]}})' | tr -d '\n' | tr -s ' ')
           echo "packages=$packages"
           echo "$packages" > packages-${{ matrix.package_type }}.json
 
@@ -123,18 +123,20 @@ jobs:
       - name: Set matrix
         id: matrix
         run: |
-          packages=$(jq -s add packages-*.json | tr -d '\n')
+          packages=$(jq -s add packages-*.json | tr -d '\n' | tr -s ' ')
           echo "packages=$packages"
           echo "packages=$packages" >> $GITHUB_OUTPUT
 
-          packages_name=$(echo $packages | jq -r '[keys[]]' | tr -d '\n')
+          packages_name=$(echo $packages | jq -r '[keys[]]' | tr -d '\n' | tr -s ' ')
           echo "packages_name=$packages_name"
           echo "packages_name=$packages_name" >> $GITHUB_OUTPUT
 
           versions=()
           for package_name in $packages_name; do
             package_version=$(echo $packages | jq -r ".\"$package_name\".versions[]")
+            echo "package_version=$package_version"
             key_version="${package_name}_${package_version}"
+            echo "key_version=$key_version"
             versions+=("$key_version")
           done
           versions_json=$(jq -n --argjson versions "${versions[*]}" '[$versions[]]')
