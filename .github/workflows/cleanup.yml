@@ -135,12 +135,12 @@ jobs:
           echo "package_name=$(echo "${{ matrix.package_name_version }}" | cut -d '.' -f 1)" >> $GITHUB_OUTPUT
           echo "package_version=$(echo "${{ matrix.package_name_version }}" | cut -d '.' -f 2)" >> $GITHUB_OUTPUT
 
-    uses: ./.github/workflows/github-package-delete.yml
-    with:
-      github-organisation: ${{ needs.setup.outputs.organisation }}
-      package-type: ${{ matrix.packages.type }}
-      package-name: ${{ matrix.packages.name }}
-      package-version: ${{ matrix.packages.version }}
+    # uses: ./.github/workflows/github-package-delete.yml
+    # with:
+    #   github-organisation: ${{ needs.setup.outputs.organisation }}
+    #   package-type: ${{ matrix.packages.type }}
+    #   package-name: ${{ matrix.packages.name }}
+    #   package-version: ${{ matrix.packages.version }}
 
   # clean-up:
   #   if: false
