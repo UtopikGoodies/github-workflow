@@ -120,7 +120,7 @@ jobs:
       - name: Set matrix
         id: matrix
         run: |
-          packages=$(jq -s add matrix-*.json)
+          packages=$(jq -s add packages-*.json)
           echo "packages=$packages"
           echo "packages=$packages" >> $GITHUB_OUTPUT
 
