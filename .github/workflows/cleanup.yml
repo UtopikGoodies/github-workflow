@@ -93,7 +93,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: packages-${{ matrix.package_type }}
-          path: packages.json
+          path: packages-${{ matrix.package_type }}.json
 
   generate-matrix:
     needs: [setup, packages-information]
@@ -101,23 +101,13 @@ jobs:
     outputs:
       packages: ${{ steps.matrix.outputs.packages }}
     steps:
-      # - name: Get results
-      #   run: |
-      #     echo ${{ needs.packages-information.result['container'] }}
-
-      #     for package_type in $(echo '${{ needs.setup.outputs.package_type }}' | jq -r '.[]')
-      #     do
-      #       echo "Processing package type: $package_type"
-      #       wget -q -O matrix-$package_type.json \
-      #         https://raw.githubusercontent.com/${{ needs.setup.outputs.organisation }}/${{ needs.setup.outputs.repository }}/${{ github.run_id }}/packages.json
-      #     done
       - name: Download packages information
         id: download
         uses: actions/download-artifact@v4
         with:
           merge-multiple: true
 
-      - run: ls -la
+      - run: ls -la # TODO:DEBUG: Remove this line
 
       - name: Set matrix
         id: matrix
