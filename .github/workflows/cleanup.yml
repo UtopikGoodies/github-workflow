@@ -114,7 +114,10 @@ jobs:
           packages=$(jq -s add packages-*.json | tr -d '\n')
           echo "packages=$packages"
           echo "packages=$packages" >> $GITHUB_OUTPUT
-          echo "packages_name=$(echo $packages | jq -r 'keys[]')" >> $GITHUB_OUTPUT
+
+          packages_name=$(echo $packages | jq -r 'keys[]' | tr -d '\n')
+          echo "packages_name=$packages_name"
+          echo "packages_name=$packages_name" >> $GITHUB_OUTPUT
 
   remove-packages:
     needs: [setup, generate-matrix]
