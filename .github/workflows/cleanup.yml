@@ -86,7 +86,7 @@ jobs:
 
           packages=$(jq -n --argjson names "$names_json" --argjson numbers "$numbers_json" 'reduce range(0; $names|length) as $i ({}; . + {($names[$i]): {version: ("${{ inputs.prefix }}" + ($numbers[$i] | tostring))}})' | tr -d '\n')
           echo "packages=$packages"
-          echo "$packages" > packages.json
+          echo "$packages" > packages-${{ matrix.package_type }}.json
 
       - name: Upload packages information
         id: upload
