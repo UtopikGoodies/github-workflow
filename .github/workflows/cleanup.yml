@@ -119,7 +119,7 @@ jobs:
           # echo "packages_name=$packages_name"
           # echo "packages_name=$packages_name" >> $GITHUB_OUTPUT
 
-          packages_name=$(echo $packages | jq -c -r '[to_entries[] | {(.key): .value.versions[] | tostring}]')
+          packages_name=$(echo $packages | jq -c -r '[to_entries[] | .key + ": " + (.value.versions[] | tostring)]')
           echo "packages_name=$packages_name"
           echo "packages_name=$packages_name" >> $GITHUB_OUTPUT
 
