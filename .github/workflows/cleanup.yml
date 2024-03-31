@@ -64,7 +64,7 @@ jobs:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
           response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }})
-          # echo "$response"
+          echo "$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
             packages=$(jq -j '[.[] | .name]' <<<"$response" | tr -d '\n')
           fi
