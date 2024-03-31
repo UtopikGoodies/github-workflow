@@ -115,7 +115,7 @@ jobs:
           echo "packages=$packages"
           echo "packages=$packages" >> $GITHUB_OUTPUT
 
-          packages_name=$(echo $packages | jq -r '[keys[]]' | tr -d '\n')
+          packages_name=$(echo $packages | jq -r 'keys[]' | tr -d '\n' | tr -s ' ')
           echo "packages_name=$packages_name"
           echo "packages_name=$packages_name" >> $GITHUB_OUTPUT
 
