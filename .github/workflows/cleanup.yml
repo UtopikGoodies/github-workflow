@@ -107,12 +107,10 @@ jobs:
         with:
           merge-multiple: true
 
-      - run: ls -la # TODO:DEBUG: Remove this line
-
       - name: Set matrix
         id: matrix
         run: |
-          packages=$(jq -s add packages-*.json)
+          packages=$(jq -s add packages-*.json | tr -d '\n')
           echo "packages=$packages"
           echo "packages=$packages" >> $GITHUB_OUTPUT
 
