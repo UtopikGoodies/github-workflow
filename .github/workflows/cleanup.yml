@@ -9,7 +9,7 @@ on:
         default: ${{ github.repository }}
 
 env:
-  PACKAGE_TYPES: '["container", "npm", "maven", "rubygems", "docker", "nuget"]'
+  PACKAGE_TYPES: '["npm", "maven", "rubygems", "docker", "nuget", "container"]'
 
 jobs:
   setup:
@@ -63,10 +63,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
-          response=$(gh api \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            /orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }})
           # response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }})
           echo "$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
