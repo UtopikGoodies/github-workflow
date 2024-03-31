@@ -133,7 +133,7 @@ jobs:
 
           versions=()
           for package_name in $packages_name; do
-            package_version=$(echo $packages | jq -r ".$package_name.versions[]")
+            package_version=$(echo $packages | jq -r ".\"$package_name\".versions[]")
             key_version="${package_name}_${package_version}"
             versions+=("$key_version")
           done
