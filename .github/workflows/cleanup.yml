@@ -78,7 +78,7 @@ jobs:
             -H "Accept: application/vnd.github.packages-preview+json" \
             "https://api.github.com/orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }}" > packages.json
 
-            echo "packages=$(jq -j '[.[] | .name]' packages.json | tr -d '\n')"
+            echo "packages=$(cat packages.json)"
 
       - name: Export packages information
         id: export
