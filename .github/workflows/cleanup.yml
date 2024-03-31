@@ -100,16 +100,16 @@ jobs:
     outputs:
       packages: ${{ steps.matrix.outputs.packages }}
     steps:
-      - name: Download artifacts
+      - name: Get results
         run: |
           echo ${{ needs.packages-information.result['container'] }}
 
-          # for package_type in $(echo '${{ needs.setup.outputs.package_type }}' | jq -r '.[]')
-          # do
-          #   echo "Processing package type: $package_type"
-          #   echo ${{ needs.packages-information.outputs.packages }}
-          #   echo ${{ needs.packages-information.outputs.packages }} > matrix-$package_type.json
-          # done
+          for package_type in $(echo '${{ needs.setup.outputs.package_type }}' | jq -r '.[]')
+          do
+            echo "Processing package type: $package_type"
+            echo ${{ needs.packages-information.result['$package_type'] }}
+            echo ${{ needs.packages-information.result['$package_type'] }} > matrix-$package_type.json
+          done
 
       - name: Set matrix
         id: matrix
