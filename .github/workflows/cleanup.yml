@@ -7,6 +7,9 @@ on:
         description: 'The organisation/repository to clean up packages for'
         type: string
         default: ${{ github.repository }}
+    secrets:
+      github-token:
+        description: 'The GitHub token to use for API requests'
 
 env:
   PACKAGE_TYPES: '["npm", "maven", "rubygems", "docker", "nuget", "container"]'
@@ -34,7 +37,7 @@ jobs:
       - name: Get all closed pull requests
         id: pullrequests
         env:
-          GH_TOKEN: ${{ secrets.github-token || github.token }}
+          GH_TOKEN: ${{ secrets.github-token }}
         run: |
           response=$(gh api /repos/${{ inputs.repository }}/pulls)
           # echo "$response"
@@ -58,27 +61,19 @@ jobs:
     outputs:
       packages: ${{ steps.export.outputs.packages }}
     steps:
-      # - name: Get all ${{ matrix.package_type }} packages
-      #   id: packages
-      #   env:
-      #     GH_TOKEN: ${{ secrets.github-token || github.token }}
-      #   run: |
-      #     response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }})
-      #     echo "$response"
-      #     if jq -e . >/dev/null 2>&1 <<<"$response"; then
-      #       packages=$(jq -j '[.[] | .name]' <<<"$response" | tr -d '\n')
-      #     fi
-
-      #     echo "packages=$packages"
-      #     echo "names=$packages" >> $GITHUB_OUTPUT
       - name: Get all ${{ matrix.package_type }} packages
+        id: packages
+        env:
+          GH_TOKEN: ${{ secrets.github-token }}
         run: |
-          curl -s \
-            -H "Authorization: token ${{ secrets.github-token || github.token }}" \
-            -H "Accept: application/vnd.github.packages-preview+json" \
-            "https://api.github.com/orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }}" > packages.json
+          response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }})
+          echo "$response"
+          if jq -e . >/dev/null 2>&1 <<<"$response"; then
+            packages=$(jq -j '[.[] | .name]' <<<"$response" | tr -d '\n')
+          fi
 
-            echo "packages=$(cat packages.json)"
+          echo "packages=$packages"
+          echo "names=$packages" >> $GITHUB_OUTPUT
 
       - name: Export packages information
         id: export
