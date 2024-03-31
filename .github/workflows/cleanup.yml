@@ -102,7 +102,7 @@ jobs:
     steps:
       - name: Download artifacts
         run: |
-          echo ${{ needs.packages-information.result }}
+          echo ${{ needs.packages-information.result['container'] }}
 
           # for package_type in $(echo '${{ needs.setup.outputs.package_type }}' | jq -r '.[]')
           # do
