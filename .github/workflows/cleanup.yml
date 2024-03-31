@@ -117,6 +117,8 @@ jobs:
         with:
           merge-multiple: true
 
+      - run: ls -la
+
       - name: Set matrix
         id: matrix
         run: |
