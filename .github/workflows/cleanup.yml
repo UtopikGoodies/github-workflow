@@ -83,9 +83,10 @@ jobs:
         run: |
           for package in ${{ steps.packages.outputs.names }}; do
             response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/${package}/versions)
+            echo "$response"
             versions+=($(jq -c '[.[] | select(.name | contains("${{ inputs.prefix }}")) | {id, name}]' <<<"$response"))
           done
-            
+          
           echo "versions=$versions"
 
       # - name: Export packages information
