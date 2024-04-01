@@ -83,8 +83,7 @@ jobs:
         run: |
           for package in ${{ steps.packages.outputs.names }}; do
             response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/${package}/versions)
-            # Add only version that content numbers
-            versions+=(jq -c '[.[] | select(.name | contains("${{ inputs.prefix }}")) | {id, name}]' <<<"$response")
+            versions+=($(jq -c '[.[] | select(.name | contains("${{ inputs.prefix }}")) | {id, name}]' <<<"$response"))
           done
             
           echo "versions=$versions"
