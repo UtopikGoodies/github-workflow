@@ -81,7 +81,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.github-token }}
         run: |
-          for package in ${{ steps.packages.outputs.names }}; do
+          packages='${{ steps.packages.outputs.names }}'
+          for package in $(jq -r '.[]' <<<"$packages"); do
             echo "package=$package"
             response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/${package}/versions)
             echo "$response"
