@@ -73,7 +73,7 @@ jobs:
           # echo "$response"
           packages=$(jq -c '[.[] | .name]' <<<"$response")
 
-          echo "packages=$packages"
+          echo "names=$packages"
           echo "names=$packages" >> $GITHUB_OUTPUT
 
       - name: Get all packages versions
@@ -82,6 +82,7 @@ jobs:
           GH_TOKEN: ${{ secrets.github-token }}
         run: |
           for package in ${{ steps.packages.outputs.names }}; do
+            echo "package=$package"
             response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/${package}/versions)
             echo "$response"
             versions+=($(jq -c '[.[] | select(.name | contains("${{ inputs.prefix }}")) | {id, name}]' <<<"$response"))
