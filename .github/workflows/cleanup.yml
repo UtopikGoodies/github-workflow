@@ -16,8 +16,7 @@ on:
         description: 'The GitHub token to use for API requests'
 
 env:
-  PACKAGE_TYPES: '["container", "npm"]'
-  # PACKAGE_TYPES: '["container", "npm", "maven", "rubygems", "docker", "nuget"]'
+  PACKAGE_TYPES: '["container", "npm", "maven", "rubygems", "docker", "nuget"]'
 
 jobs:
   setup:
@@ -52,7 +51,7 @@ jobs:
           echo "numbers=$numbers"
           echo "numbers=$numbers" >> $GITHUB_OUTPUT
 
-  packages-information:
+  packages-delete:
     needs: [setup, pullrequests-information]
     runs-on: ubuntu-latest
     permissions:
@@ -61,8 +60,6 @@ jobs:
     strategy:
       matrix:
         package_type: ${{ fromJson(needs.setup.outputs.package_type) }}
-    # outputs:
-    #   packages: ${{ steps.export.outputs.packages }}
     steps:
       - name: Get all ${{ matrix.package_type }} packages
         id: packages
