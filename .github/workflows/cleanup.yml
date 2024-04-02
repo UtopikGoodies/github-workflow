@@ -89,7 +89,7 @@ jobs:
             echo "$response"
             version=$(jq -c '.[] | select(.name | contains("${{ inputs.prefix }}")) | {id, name}' <<<"$response")
             echo "version=$version"
-            versions+=($version)
+            versions+=("$version")
           done
           
           echo "versions=$versions"
