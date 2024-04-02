@@ -90,17 +90,21 @@ jobs:
             versions+=($(jq -c --arg package "${package}"'.[] | select(.name | contains("${{ inputs.prefix }}")) | {id, name, "package": $package}' <<<"$response"))
           done
           
-          echo "versions=[$(IFS=,; echo "${versions[*]}")]" >> $GITHUB_OUTPUT
+          versions=[$(IFS=,; echo "${versions[*]}")]
+          echo "versions=$versions" >> $GITHUB_OUTPUT
 
       - name: Delete package version
         env:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
-          for version in ${{ steps.versions.outputs.versions }}; do
+          versions=${{ steps.versions.outputs.versions }}
+          for version in $(jq -r '.[]' <<<"$versions"); do
             echo "version=$version"
             id=$(jq -r '.id' <<<"$version")
             echo "id=$id"
-            result=$(gh api -X DELETE /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/${{ inputs.package-name }}/versions/$id)
+            package=$(jq -r '.package' <<<"$version")
+            echo "package=$package"
+            result=$(gh api -X DELETE /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/$package/versions/$id)
             echo "$result"
           done
 
