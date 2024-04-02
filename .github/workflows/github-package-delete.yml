@@ -5,7 +5,6 @@ on:
     inputs:
       github-organisation:
         description: 'GitHub organisation name'
-        required: true
         type: string
         default: ${{ github.repository_owner }}
       package-type:
@@ -23,13 +22,28 @@ on:
     secrets:
       github-token:
         description: 'GitHub token'
-        required: false
 
 jobs:
   delete:
     runs-on: ubuntu-latest
     steps:
+      - name: Check package exist
+        id: package_exist
+        env:
+          GH_TOKEN: ${{ secrets.github-token || github.token }}
+        run: |
+          response=$(gh api /orgs/${{ inputs.github-organisation }}/packages?package_type=${{ inputs.package-type }})
+          echo "response=$response"
+          if jq -e . >/dev/null 2>&1 <<<"$response"; then
+            package_name=$(jq -r '.[] | select(.name=="${{ inputs.package-name }}") | .name' <<<"$response")
+            fi
+            
+            echo "package_name=$package_name"
+            exist=$(if [[ -n "$package_name" ]]; then echo 1; else echo 0; fi)
+            echo "exist=$exist" >> $GITHUB_OUTPUT
+
       - name: Get package id
+        if: steps.package_exist.outputs.exist == 1
         id: package_id
         env:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
@@ -38,9 +52,9 @@ jobs:
           # echo "response=$response"
           if jq -e . >/dev/null 2>&1 <<<"$response"; then
             package_id=$(jq -r '.[] | select(.name=="${{ inputs.package-version }}") | .id' <<<"$response")
-            echo "package_id=$package_id"
           fi
-
+            
+          echo "package_id=$package_id"
           echo "id=$package_id" >> $GITHUB_OUTPUT
 
       - name: Delete package version

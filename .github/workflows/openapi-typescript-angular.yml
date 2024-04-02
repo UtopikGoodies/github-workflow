@@ -5,7 +5,6 @@ on:
     inputs:
       artifact-name:
         description: 'The name of the OpenAPI artifact to use'
-        required: true
         type: string
         default: 'openapi'
       npm-registry:
@@ -27,7 +26,6 @@ on:
         type: string
       npm-package-tag:
         description: 'The npm tag of the package'
-        required: false
         type: string
         default: 'latest'
       npm-package-description:

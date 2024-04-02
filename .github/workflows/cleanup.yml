@@ -1,105 +1,111 @@
 name: Clean Up
 
 on:
-  push:
-    branches: [ "main" ]
+  workflow_call:
+    inputs:
+      repository:
+        description: 'The organisation/repository to clean up packages for'
+        type: string
+        default: ${{ github.repository }}
+      prefix:
+        description: 'The prefix to use for the package versions'
+        type: string
+        default: 'pr.'
+    secrets:
+      github-token:
+        description: 'The GitHub token to use for API requests'
+
+env:
+  PACKAGE_TYPES: '["container", "npm", "maven", "rubygems", "docker", "nuget"]'
 
 jobs:
-  clean-up:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      organisation: ${{ env.ORGANISATION }}
+      repository: ${{ env.REPOSITORY }}
+      package_type: ${{ env.PACKAGE_TYPES }}
+    steps:
+      - name: Set outputs
+        id: meta
+        run: |
+          echo "ORGANISATION=$(echo ${{ inputs.repository }} | cut -d '/' -f 1)" >> $GITHUB_ENV
+          echo "REPOSITORY=$(echo ${{ inputs.repository }} | cut -d '/' -f 2)" >> $GITHUB_ENV
+
+  pullrequests-information:
+    needs: setup
+    runs-on: ubuntu-latest
+    outputs:
+      numbers: ${{ steps.pullrequests.outputs.numbers }}
+    steps:
+      - name: Get all closed pull requests
+        id: pullrequests
+        env:
+          GH_TOKEN: ${{ secrets.github-token }}
+        run: |
+          response=$(gh api /repos/${{ inputs.repository }}/pulls)
+          # echo "$response"
+          # numbers=$(jq -c '[.[] | select(.state=="closed") | .number]' <<<"$response")
+          numbers=$(jq -c '[.[] | select(.state=="open") | .number]' <<<"$response") #TODO:DEBUG: Uncomment the above line, remove this line
+
+          echo "numbers=$numbers"
+          echo "numbers=$numbers" >> $GITHUB_OUTPUT
+
+  packages-delete:
+    needs: [setup, pullrequests-information]
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      packages: read
+    strategy:
+      matrix:
+        package_type: ${{ fromJson(needs.setup.outputs.package_type) }}
     steps:
-      - name: Delete Versions of Packages for Closed PRs
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.WORKFLOW_TOKEN }}
-          script: |
-            const org = context.repo.owner;
-            const repo = context.repo.repo;
+      - name: Get all ${{ matrix.package_type }} packages
+        id: packages
+        env:
+          GH_TOKEN: ${{ secrets.github-token }}
+        run: |
+          response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages?package_type=${{ matrix.package_type }})
+          # echo "$response"
+          packages=$(jq -c '[.[] | .name]' <<<"$response")
 
-            const packageTypes = ['container', 'npm', 'maven', 'rubygems', 'docker', 'nuget'];
+          echo "names=$packages"
+          echo "names=$packages" >> $GITHUB_OUTPUT
 
-            async function safeApiCall(apiPromise, description) {
-              try {
-                const response = await apiPromise;
-                console.log(`Success: ${description}`);
-                return response;
-              } catch (error) {
-                console.error(`API Error for ${description}:`, error);
-                return null;
-              }
+      - name: Get all packages versions
+        id: versions
+        env:
+          GH_TOKEN: ${{ secrets.github-token }}
+        run: |
+          versions=()
+          packages='${{ steps.packages.outputs.names }}'
+          for package in $(jq -r '.[]' <<<"$packages"); do
+            echo "package=$package"
+            response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/${package}/versions)
+            echo "$response"
+            # if it's container, search in tags
+            if [[ "${{ matrix.package_type }}" == "container" ]]; then
+              versions+=($(jq -c --arg package "$package" '.[] | select((.metadata.container.tags[] | contains("${{ inputs.prefix }}"))) | {id, name, package: $package}' <<<"$response"))
+            else
+              versions+=($(jq -c --arg package "$package" '.[] | select((.name | contains("${{ inputs.prefix }}"))) | {id, name, package: $package}' <<<"$response"))
+            fi
+          done
+          
+          versions=[$(IFS=,; echo "${versions[*]}")]
+          echo "versions=$versions"
+          echo "versions=$versions" >> $GITHUB_OUTPUT
+
+      - name: Delete package version
+        env:
+          GH_TOKEN: ${{ secrets.github-token || github.token }}
+        run: |
+          versions='${{ steps.versions.outputs.versions }}'
+          for row in $(echo "${versions}" | jq -r '.[] | @base64'); do
+            _jq() {
+            echo ${row} | base64 --decode | jq -r ${1}
             }
-
-            const closedPrsResponse = await safeApiCall(
-              github.rest.pulls.list({
-                owner: org,
-                repo: repo,
-                state: 'closed'
-              }), 
-              'Fetching closed PRs'
-            );
-            if (!closedPrsResponse) return;
-
-            const closedPrNumbers = closedPrsResponse.data.map(pr => pr.number);
-
-            for (const packageType of packageTypes) {
-              console.log(`Checking package type: ${packageType}`);
-
-              let packagesResponse;
-              try {
-                packagesResponse = await github.rest.packages.listPackagesForOrganization({
-                  org: org,
-                  package_type: packageType
-                });
-              } catch (error) {
-                console.error(`Error fetching packages of type ${packageType}:`, error);
-                continue;
-              }
-
-              for (const package of packagesResponse.data) {
-                const packageName = package.name;
-                console.log(`Checking package: ${packageName}`);
-
-                const versionsResponse = await safeApiCall(
-                  github.rest.packages.getAllPackageVersionsForPackageOwnedByOrg({
-                    org: org,
-                    package_type: packageType,
-                    package_name: packageName
-                  }),
-                  `Fetching versions for package ${packageName}`
-                );
-                if (!versionsResponse) continue;
-
-                for (const version of versionsResponse.data) {
-                  let prNumberMatch;
-                  if (packageType === 'container' || packageType === 'docker') {
-                    // For container and docker, use the tag
-                    const versionTags = version.metadata.container.tags;
-                    for (const tag of versionTags) {
-                      prNumberMatch = tag.match(/.(\d+)$/);
-                      if (prNumberMatch && closedPrNumbers.includes(parseInt(prNumberMatch[1]))) {
-                        break; // Break the loop if a matching PR number is found
-                      }
-                    }
-                  } else {
-                    // For maven, rubygems, nuget, use the version name
-                    prNumberMatch = version.name.match(/.(\d+)$/);
-                  }
-
-                  if (prNumberMatch && closedPrNumbers.includes(parseInt(prNumberMatch[1]))) {
-                    console.log(`Deleting package version ${version.id} of ${packageName} for closed PR #${prNumberMatch[1]}`);
-                    await safeApiCall(
-                      github.rest.packages.deletePackageVersionForOrg({
-                        org: org,
-                        package_type: packageType,
-                        package_name: packageName,
-                        package_version_id: version.id,
-                      }),
-                      `Deleting package version ${version.id} of ${packageName}`
-                    );
-                  }
-                }
-              }
-            }
+            echo "Delete version $(_jq .name) of $(_jq .package)"
+            result=$(gh api -X DELETE /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/$(_jq .package)/versions/$(_jq .id))
+            echo "$result"
+          done
