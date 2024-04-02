@@ -81,6 +81,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.github-token }}
         run: |
+          versions=()
           packages='${{ steps.packages.outputs.names }}'
           for package in $(jq -r '.[]' <<<"$packages"); do
             echo "package=$package"
