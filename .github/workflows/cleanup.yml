@@ -87,12 +87,10 @@ jobs:
             echo "package=$package"
             response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/${package}/versions)
             echo "$response"
-            version=$(jq -c '.[] | select(.name | contains("${{ inputs.prefix }}")) | {id, name}' <<<"$response")
-            echo "version=$version"
-            versions+=("$version")
+            versions+=($response)
           done
           
-          echo "versions=$versions"
+          echo "versions=[$(IFS=,; echo "${versions[*]}")]"
 
       # - name: Export packages information
       #   id: export
