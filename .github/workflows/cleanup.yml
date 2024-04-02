@@ -91,6 +91,7 @@ jobs:
           done
           
           versions=[$(IFS=,; echo "${versions[*]}")]
+          echo "versions=$versions"
           echo "versions=$versions" >> $GITHUB_OUTPUT
 
       - name: Delete package version
