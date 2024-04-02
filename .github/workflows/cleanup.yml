@@ -89,7 +89,7 @@ jobs:
             echo "$response"
             # if it's container, search in tags
             if [[ "${{ matrix.package_type }}" == "container" ]]; then
-              versions+=($(jq -c --arg package "$package" '.[] | select((.metadata.container..tags[] | contains("${{ inputs.prefix }}"))) | {id, name, package: $package}' <<<"$response"))
+              versions+=($(jq -c --arg package "$package" '.[] | select((.metadata.container.tags[] | contains("${{ inputs.prefix }}"))) | {id, name, package: $package}' <<<"$response"))
             else
               versions+=($(jq -c --arg package "$package" '.[] | select((.name | contains("${{ inputs.prefix }}"))) | {id, name, package: $package}' <<<"$response"))
             fi
@@ -112,5 +112,3 @@ jobs:
             result=$(gh api -X DELETE /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/$(_jq .package)/versions/$(_jq .id))
             echo "$result"
           done
-
-          
