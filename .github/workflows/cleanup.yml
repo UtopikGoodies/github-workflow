@@ -87,7 +87,11 @@ jobs:
             echo "package=$package"
             response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/${package}/versions)
             echo "$response"
-            versions+=($(jq -c --arg package "$package" --arg prefix "${{ inputs.prefix }}" '.[] | select((.name | contains($prefix)) or (.metadata.package_type == "container" and .metadata.container.tags | any(. == $prefix))) | {id, name, package: $package}' <<<"$response"))
+            if [[ -z "${response}" ]]; then
+              echo "No versions found for package: ${package}"
+            else
+              versions+=($(jq -c --arg package "$package" --arg prefix "${{ inputs.prefix }}" 'if type == "array" then .[] | select((.name | contains($prefix)) or (.metadata.package_type == "container" and .metadata.container.tags | any(. == $prefix))) | {id, name, package: $package} else . end' <<<"$response"))
+            fi
           done
           
           versions=[$(IFS=,; echo "${versions[*]}")]
