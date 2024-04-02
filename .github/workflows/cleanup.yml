@@ -87,10 +87,23 @@ jobs:
             echo "package=$package"
             response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/${package}/versions)
             echo "$response"
-            versions+=($(jq -c '.[] | select(.name | contains("${{ inputs.prefix }}")) | {id, name}' <<<"$response"))
+            versions+=($(jq -c --arg package "${package}"'.[] | select(.name | contains("${{ inputs.prefix }}")) | {id, name}' <<<"$response"))
           done
           
-          echo "versions=[$(IFS=,; echo "${versions[*]}")]"
+          echo "versions=[$(IFS=,; echo "${versions[*]}")]" >> $GITHUB_OUTPUT
+
+      - name: Delete package version
+        env:
+          GH_TOKEN: ${{ secrets.github-token || github.token }}
+        run: |
+          for version in ${{ steps.versions.outputs.versions }}; do
+            echo "version=$version"
+            id=$(jq -r '.id' <<<"$version")
+            echo "id=$id"
+            result=$(gh api -X DELETE /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/${{ inputs.package-name }}/versions/$id)
+            echo "$result"
+          done
+
 
       # - name: Export packages information
       #   id: export
@@ -107,12 +120,12 @@ jobs:
       #     echo "packages=$packages"
       #     echo "$packages" > packages-${{ matrix.package_type }}.json
 
-      - name: Upload packages information
-        id: upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: packages-${{ matrix.package_type }}
-          path: packages-${{ matrix.package_type }}.json
+      # - name: Upload packages information
+      #   id: upload
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: packages-${{ matrix.package_type }}
+      #     path: packages-${{ matrix.package_type }}.json
 
   # generate-matrix:
   #   needs: [setup, packages-information]
