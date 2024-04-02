@@ -87,7 +87,7 @@ jobs:
             echo "package=$package"
             response=$(gh api /orgs/${{ needs.setup.outputs.organisation }}/packages/${{ matrix.package_type }}/${package}/versions)
             echo "$response"
-            versions+=($(jq -c --arg package "$package" '.[] | select((.name | contains("${{ inputs.prefix }}")) or (.metadata.package_type == "container" and .metadata.container.tags | contains(["pr.23"])))) | {id, name, package: $package}' <<<"$response"))
+            versions+=($(jq -c --arg package "$package" '.[] | select((.name | contains("${{ inputs.prefix }}")) or (.metadata.package_type == "container" and .metadata.container.tags | contains(["pr.23"]))) | {id, name, package: $package}' <<<"$response"))
           done
           
           versions=[$(IFS=,; echo "${versions[*]}")]
