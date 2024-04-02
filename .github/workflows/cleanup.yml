@@ -61,8 +61,8 @@ jobs:
     strategy:
       matrix:
         package_type: ${{ fromJson(needs.setup.outputs.package_type) }}
-    outputs:
-      packages: ${{ steps.export.outputs.packages }}
+    # outputs:
+    #   packages: ${{ steps.export.outputs.packages }}
     steps:
       - name: Get all ${{ matrix.package_type }} packages
         id: packages
@@ -98,7 +98,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.github-token || github.token }}
         run: |
-          versions=${{ steps.versions.outputs.versions }}
+          versions='${{ steps.versions.outputs.versions }}'
           for version in $(jq -r '.[]' <<<"$versions"); do
             echo "version=$version"
             id=$(jq -r '.id' <<<"$version")
