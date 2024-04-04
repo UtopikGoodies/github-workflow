@@ -1,0 +1,43 @@
+name: Deploy Kubernates
+
+on:
+  workflow_call:
+    inputs:
+      manifest:
+        description: 'Manifest file path'
+        required: true
+        type: string
+      version:
+        description: 'Version of the project'
+        required: true
+        type: string
+      url:
+        description: 'URL to reach the project'
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up manifest
+        env:
+          VERSION: ${{ inputs.version }}
+          URL: ${{ inputs.url }}
+        run: |
+          envsubst < ${{ inputs.manifest }} > temp.yaml && \
+            mv temp.yaml ${{ inputs.manifest }}
+
+      - name: Show manifest
+        if: runner.debug
+        run: cat ${{ inputs.manifest }}
+
+      - name: Deploy ${{ inputs.manifest }}
+        uses: actions-hub/kubectl@v1.29.2
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        with:
+          args: apply -f ${{ inputs.manifest }}
