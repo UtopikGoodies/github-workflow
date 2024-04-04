@@ -15,6 +15,10 @@ on:
         description: 'URL to reach the project'
         required: true
         type: string
+    secrets:
+      kube-config:
+        description: 'Kube config'
+        required: true
 
 jobs:
   deploy:
@@ -38,6 +42,6 @@ jobs:
       - name: Deploy ${{ inputs.manifest }}
         uses: actions-hub/kubectl@v1.29.2
         env:
-          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+          KUBE_CONFIG: ${{ secrets.kube-config }}
         with:
           args: apply -f ${{ inputs.manifest }}
