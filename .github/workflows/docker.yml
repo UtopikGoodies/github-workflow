@@ -13,8 +13,8 @@ on:
         type: string
       dockerfile-directory:
         description: 'Directory containing the Dockerfile'
-        required: true
         type: string
+        default: '.'
     outputs:
       image-tags:
         description: 'Docker image tags'
