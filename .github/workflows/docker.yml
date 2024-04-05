@@ -7,10 +7,6 @@ on:
         description: 'Docker registry to push images to'
         required: true
         type: string
-      username:
-        description: 'Docker registry username'
-        required: true
-        type: string
       dockerfile-directory:
         description: 'Directory containing the Dockerfile'
         type: string
@@ -20,6 +16,9 @@ on:
         description: 'Docker image tags'
         value: ${{ jobs.build-publish.outputs.image-tags }}
     secrets:
+      username:
+        description: 'Docker registry username'
+        required: true
       password:
         description: 'Docker registry password'
         required: true
